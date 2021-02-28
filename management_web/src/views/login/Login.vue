@@ -6,16 +6,18 @@
     <div class="login-form">
       <div class="form-title">
         <h2>软件项目管理系统</h2>
+      </div>
+      <div class="form-title">
         <h3>登录</h3>
       </div>
-      <el-form label-position="left" v-model="loginForm">
-        <el-form-item>
-          <el-input v-model="loginForm.username" prefix-icon="el-icon-user-solid" placeholder="请输入用户名" />
+      <el-form label-position="left" :model="loginForm" :rules="loginRules" status-icon>
+        <el-form-item prop="mail" style="padding-bottom: 10px">
+          <el-input v-model="loginForm.mail" prefix-icon="el-icon-user-solid" placeholder="请输入邮箱" />
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="password" style="padding-bottom: 10px">
           <el-input v-model="loginForm.password" prefix-icon="el-icon-s-promotion" placeholder="请输入密码" show-password />
         </el-form-item>
-        <el-button type="primary" style="width: 100%">登录</el-button>
+        <el-button type="primary" style="width: 100%" @click="handleSubmit(loginForm)">登录</el-button>
       </el-form>
       <el-divider>其他方式登录</el-divider>
       <div class="login-by">
@@ -28,13 +30,43 @@
 
 <script>
 import canvasNest from '@/components/canvasNest/index.vue'
+// import { request } from '@/network/request.js'
+
 export default {
   components: {
     canvasNest
   },
   data() {
+    // 校验规则
+    const validateMail = (rule, value, callback) => {
+      const regex = /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+      if (value === '') {
+        callback(new Error('邮箱不能为空'))
+      } else if (!regex.test(value)) {
+        callback(new Error('请输入正确的邮箱'))
+      } else {
+        callback()
+      }
+    }
+
     return {
-      loginForm: { username: '', password: '' }
+      loginForm: { mail: '', password: '' },
+      loginRules: {
+        mail: [{ required: true, validator: validateMail, trigger: 'blur' }],
+        password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' },
+          { min: 6, max: 18, message: '请输入6-18位密码', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    handleSubmit(login) {
+      // request({
+      //   url: '/'
+      // }).then(res => {
+      //   console.log(res)
+      // })
     }
   }
 }
@@ -74,6 +106,7 @@ $text-color: #fff;
     font-size: 18px;
     .form-title {
       text-align: center;
+      margin: 15px 0;
     }
     .login-by {
       text-align: center;
@@ -81,6 +114,7 @@ $text-color: #fff;
         width: 30px;
         height: 30px;
         margin: 0 10px;
+        cursor: pointer;
       }
     }
   }

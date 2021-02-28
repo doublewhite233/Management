@@ -14,12 +14,23 @@ const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/mywork',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
-      component: () => import('@/views/About.vue'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      path: 'mywork',
+      name: 'mywork',
+      component: () => import('@/views/general/myWork/MyWork.vue'),
+      meta: { title: 'mywork', icon: 'dashboard' }
+    }]
+  },
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/project',
+    children: [{
+      path: 'project',
+      name: 'project',
+      component: () => import('@/views/general/project/Project.vue'),
+      meta: { title: 'project', icon: 'dashboard' }
     }]
   }
 ]
