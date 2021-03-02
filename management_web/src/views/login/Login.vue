@@ -17,7 +17,7 @@
         <el-form-item prop="password" style="padding-bottom: 10px">
           <el-input v-model="loginForm.password" prefix-icon="el-icon-s-promotion" placeholder="请输入密码" show-password />
         </el-form-item>
-        <el-button type="primary" style="width: 100%" @click="handleSubmit(loginForm)">登录</el-button>
+        <el-button type="primary" style="width: 100%" @click="handleLogin(loginForm)">登录</el-button>
       </el-form>
       <el-divider>其他方式登录</el-divider>
       <div class="login-by">
@@ -30,7 +30,7 @@
 
 <script>
 import canvasNest from '@/components/canvasNest/index.vue'
-// import { request } from '@/network/request.js'
+import { loginReq } from '@/network/login.js'
 
 export default {
   components: {
@@ -61,12 +61,13 @@ export default {
     }
   },
   methods: {
-    handleSubmit(login) {
-      // request({
-      //   url: '/'
-      // }).then(res => {
-      //   console.log(res)
-      // })
+    async handleLogin(form) {
+      const res = await loginReq(form.mail, form.password)
+      if (res.code === 0) {
+        console.log('success')
+      } else {
+        this.$message({ message: res.data, type: 'warning' })
+      }
     }
   }
 }
