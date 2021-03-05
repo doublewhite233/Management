@@ -1,10 +1,10 @@
 'use strict';
 
-const md5 = require('blueimp-md5')
+import md5 from 'blueimp-md5'
 
 // 1.测试连接数据库
-const mongoose = require('mongoose')
-mongoose.connect('mongodb://localhost:27017/management', { useNewUrlParser: true, useUnifiedTopology: true })
+import mongoose from 'mongoose'
+mongoose.connect('mongodb://localhost:27017/Management', { useNewUrlParser: true, useUnifiedTopology: true })
 const conn = mongoose.connection
 conn.on('connected', function() {
     console.log('数据库连接成功。')
@@ -14,8 +14,7 @@ conn.on('connected', function() {
 // 定义Schema（描述文档结构）
 const userSchema = mongoose.Schema({
     username: { type: String, required: true },
-    password: { type: String, required: true },
-    avatar: { type: String }
+    password: { type: String, required: true }
 })
 // 定义Model（与集合对应，可以操作集合）
 const UserModel = mongoose.model('user', userSchema)
@@ -23,7 +22,7 @@ const UserModel = mongoose.model('user', userSchema)
 // 3.通过Model或其实例对集合数据进行CRUD操作
 // save()添加数据
 function testSave() {
-    const userModel = new UserModel({ username: 'a', password: md5('123') })
+    const userModel = new UserModel({ username: 'admin@aa.com', password: md5('123456') })
     userModel.save((error, userDoc) => {
         console.log('save()', error, userDoc)
     })
@@ -39,7 +38,7 @@ function testFind() {
         console.log('findOne()', error, user)
     })
 }
-testFind()
+// testFind()
 
 // findByIdAndUpdate()更新数据
 function testUpdate() {

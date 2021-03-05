@@ -13,4 +13,11 @@ const router = express.Router()
   */
 router.post('/login', user_controller.userLogin)
 
+// 获取用户信息
+/*
+  body:
+  _id: [required, String], 用户id
+  */
+router.post('/userinfo', user_controller.userInfo)
+
 export default router

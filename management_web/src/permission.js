@@ -1,10 +1,34 @@
 import router from './router'
+import store from './store'
+import { getCookie } from '@/utils/cookies.js'
 
 // 使用导航守卫
 router.beforeEach((to, from, next) => {
-  console.log(to)
-  if (to.path === '/search') {
-    router.replace('/login')
+  // 获取cookie并判断是否存在
+  const cookie = getCookie('userid')
+  if (cookie !== undefined) {
+    // 截取cookie中user_id部分
+    const regex = /".+"/
+    let user_id = cookie.match(regex)
+    user_id = user_id[0].substring(1, user_id[0].length - 1)
+    // 没有用户信息，发送请求获取信息
+    if (store.getters.user_id === '' || store.getters.user_id !== user_id) {
+      store.dispatch('getUserInfo', user_id)
+    }
+    // todo
+    // 根据用户类型生成路由
+    if (to.path === '/login') {
+      next({ path: '/' })
+    } else {
+      // todo
+      // 判断权限
+      next()
+    }
+  } else {
+    // 没有cookie，跳转登陆页面
+    if (to.path !== '/login') {
+      next({ path: '/login', replace: true })
+    }
   }
   next()
 })

@@ -15,9 +15,9 @@
           <el-input v-model="loginForm.mail" prefix-icon="el-icon-user-solid" placeholder="请输入邮箱" />
         </el-form-item>
         <el-form-item prop="password" style="padding-bottom: 10px">
-          <el-input v-model="loginForm.password" prefix-icon="el-icon-s-promotion" placeholder="请输入密码" show-password />
+          <el-input v-model.trim="loginForm.password" prefix-icon="el-icon-s-promotion" placeholder="请输入密码" show-password />
         </el-form-item>
-        <el-button type="primary" style="width: 100%" @click="handleLogin(loginForm)">登录</el-button>
+        <el-button type="primary" style="width: 100%" :loading="loading" @click="handleLogin(loginForm)">登录</el-button>
       </el-form>
       <el-divider>其他方式登录</el-divider>
       <div class="login-by">
@@ -30,7 +30,6 @@
 
 <script>
 import canvasNest from '@/components/canvasNest/index.vue'
-import { loginReq } from '@/network/login.js'
 
 export default {
   components: {
@@ -40,7 +39,7 @@ export default {
     // 校验规则
     const validateMail = (rule, value, callback) => {
       const regex = /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
-      if (value === '') {
+      if (value.trim() === '') {
         callback(new Error('邮箱不能为空'))
       } else if (!regex.test(value)) {
         callback(new Error('请输入正确的邮箱'))
@@ -57,17 +56,25 @@ export default {
           { required: true, message: '密码不能为空', trigger: 'blur' },
           { min: 6, max: 18, message: '请输入6-18位密码', trigger: 'blur' }
         ]
-      }
+      },
+      loading: false
     }
   },
   methods: {
-    async handleLogin(form) {
-      const res = await loginReq(form.mail, form.password)
-      if (res.code === 0) {
-        console.log('success')
-      } else {
-        this.$message({ message: res.data, type: 'warning' })
-      }
+    handleLogin(form) {
+      this.loading = true
+      this.$store.dispatch('login', form).then(res => {
+        this.loading = false
+        if (res.code === 0) {
+          // 登录成功并跳转
+          this.$router.push('/')
+        } else {
+          this.$message({ message: res.data, type: 'warning' })
+        }
+      }).catch(() => {
+        this.loading = false
+        this.$message({ message: '似乎出了一点问题...', type: 'error' })
+      })
     }
   }
 }
