@@ -9,7 +9,8 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    user_info: { _id: '', username: '', role: '' } // 用户信息
+    user_info: { _id: '', username: '', role: '' }, // 用户信息
+    routes: [] // 路由信息
   },
   mutations,
   actions,

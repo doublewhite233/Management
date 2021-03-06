@@ -5,10 +5,15 @@ Vue.use(VueRouter)
 
 import Layout from '@/layout'
 
-const constantRoutes = [
+export const constantRoutes = [
   {
     path: '/login',
     component: () => import('@/views/login/Login'),
+    hidden: true
+  },
+  {
+    path: '/404',
+    component: () => import('@/views/404/404.vue'),
     hidden: true
   },
   {
@@ -17,28 +22,51 @@ const constantRoutes = [
     redirect: '/mywork',
     children: [{
       path: 'mywork',
-      name: 'mywork',
+      name: '我的工作台',
       component: () => import('@/views/general/myWork/MyWork.vue'),
-      meta: { title: 'mywork', icon: 'dashboard' }
+      meta: { path: '/mywork' }
     }]
   },
   {
-    path: '/',
+    path: '/project',
     component: Layout,
-    redirect: '/project',
+    redirect: '/project/about',
+    name: '项目',
     children: [{
-      path: 'project',
-      name: 'project',
+      path: 'about',
+      name: '项目',
       component: () => import('@/views/general/project/Project.vue'),
-      meta: { title: 'project', icon: 'dashboard' }
+      meta: { path: '/project/about' }
     }]
   }
 ]
 
-const router = new VueRouter({
+export const adminRoutes = [
+  {
+    path: '/admin',
+    component: Layout,
+    redirect: '/admin/user',
+    name: '系统管理',
+    children: [{
+      path: 'user',
+      name: '用户管理',
+      component: () => import('@/views/admin/user/User.vue'),
+      meta: { path: '/admin/user' }
+    }]
+  }
+]
+
+const createRouter = () => new VueRouter({
   mode: 'history',
-  base: process.env.BASE_URL,
   routes: constantRoutes
 })
+
+const router = createRouter()
+
+// 重置路由
+export function resetRouter() {
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher
+}
 
 export default router

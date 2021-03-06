@@ -1,4 +1,5 @@
 import router from './router'
+import { resetRouter } from './router'
 import store from './store'
 import { getCookie } from '@/utils/cookies.js'
 
@@ -13,10 +14,14 @@ router.beforeEach((to, from, next) => {
     user_id = user_id[0].substring(1, user_id[0].length - 1)
     // 没有用户信息，发送请求获取信息
     if (store.getters.user_id === '' || store.getters.user_id !== user_id) {
-      store.dispatch('getUserInfo', user_id)
+      store.dispatch('getUserInfo', user_id).then(res => {
+        // 根据用户权限生成路由
+        store.dispatch('getRoutes', res.role).then(routes => {
+          resetRouter()
+          router.addRoutes(routes)
+        })
+      })
     }
-    // todo
-    // 根据用户类型生成路由
     if (to.path === '/login') {
       next({ path: '/' })
     } else {

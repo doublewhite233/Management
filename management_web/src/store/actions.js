@@ -1,6 +1,8 @@
 import { request } from '@/network/request.js'
 import { encryptAES } from '@/utils/secret.js'
-import { SET_USER_STATE } from './mutation-types.js'
+import { removeCookie } from '@/utils/cookies.js'
+import { constantRoutes, adminRoutes } from '@/router'
+import { SET_USER_STATE, CLEAR_USER_STATE, SET_ROUTES } from './mutation-types.js'
 
 export default {
   // 用户登录
@@ -34,10 +36,32 @@ export default {
         data: { _id }
       }).then(res => {
         context.commit(SET_USER_STATE, res.data)
-        resolve()
+        resolve(res.data)
       }).catch(err => {
         reject(err)
       })
+    })
+  },
+
+  // 退出登录
+  logout(context, payload) {
+    removeCookie('userid')
+    context.commit(CLEAR_USER_STATE)
+  },
+
+  // 根据权限生成路由
+  getRoutes(context, role) {
+    return new Promise((resolve, reject) => {
+      let routes = null
+      if (role === 'admin') {
+        routes = constantRoutes.concat(adminRoutes)
+      } else {
+        routes = constantRoutes
+      }
+      // 添加404匹配
+      routes.push({ path: '*', redirect: '/404', hidden: true })
+      context.commit(SET_ROUTES, routes)
+      resolve(routes)
     })
   }
 }

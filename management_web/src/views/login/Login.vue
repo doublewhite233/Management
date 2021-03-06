@@ -30,6 +30,7 @@
 
 <script>
 import canvasNest from '@/components/canvasNest/index.vue'
+import { resetRouter } from '@/router'
 
 export default {
   components: {
@@ -66,7 +67,11 @@ export default {
       this.$store.dispatch('login', form).then(res => {
         this.loading = false
         if (res.code === 0) {
-          // 登录成功并跳转
+          // 登录成功，生成路由并跳转
+          this.$store.dispatch('getRoutes', res.data.role).then(routes => {
+            resetRouter()
+            this.$router.addRoutes(routes)
+          })
           this.$router.push('/')
         } else {
           this.$message({ message: res.data, type: 'warning' })
