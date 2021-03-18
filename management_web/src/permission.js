@@ -24,10 +24,6 @@ router.beforeEach((to, from, next) => {
     }
     if (to.path === '/login') {
       next({ path: '/' })
-    } else {
-      // todo
-      // 判断权限
-      next()
     }
   } else {
     // 没有cookie，跳转登陆页面

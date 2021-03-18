@@ -23,22 +23,33 @@ export const constantRoutes = [
     children: [{
       path: 'mywork',
       name: '我的工作台',
-      component: () => import('@/views/general/myWork/MyWork.vue'),
+      component: () => import('@/views/myWork/MyWork.vue'),
       meta: { path: '/mywork' }
     }]
   },
   {
-    path: '/project',
+    path: '/',
     component: Layout,
-    redirect: '/project/about',
-    name: '项目',
+    redirect: '/project',
     children: [{
-      path: 'about',
+      path: 'project',
       name: '项目',
-      component: () => import('@/views/general/project/Project.vue'),
-      meta: { path: '/project/about' }
+      component: () => import('@/views/project/Project.vue'),
+      meta: { path: '/project' }
     }]
   }
+  // {
+  //   path: '/project',
+  //   component: Layout,
+  //   redirect: '/project/about',
+  //   name: '项目',
+  //   children: [{
+  //     path: 'about',
+  //     name: '项目',
+  //     component: () => import('@/views/general/project/Project.vue'),
+  //     meta: { path: '/project/about' }
+  //   }]
+  // }
 ]
 
 export const adminRoutes = [
@@ -48,6 +59,12 @@ export const adminRoutes = [
     redirect: '/admin/user',
     name: '系统管理',
     children: [{
+      path: 'project',
+      name: '项目管理',
+      component: () => import('@/views/admin/project/Project.vue'),
+      meta: { path: '/admin/project' }
+    },
+    {
       path: 'user',
       name: '用户管理',
       component: () => import('@/views/admin/user/User.vue'),

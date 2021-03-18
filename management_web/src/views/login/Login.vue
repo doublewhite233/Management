@@ -85,7 +85,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $background: #212121;
 $text-color: #fff;
 
@@ -93,11 +93,6 @@ $text-color: #fff;
   color: $text-color;
   background: $background;
 }
-</style>
-
-<style lang="scss" scoped>
-$background: #212121;
-$text-color: #fff;
 
 .login-container {
   width: 100vw;

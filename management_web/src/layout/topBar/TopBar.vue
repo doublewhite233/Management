@@ -10,7 +10,6 @@
         </el-submenu>
       </template>
       <!-- <el-menu-item index="search">查找</el-menu-item>
-      <el-menu-item index="statistic">统计</el-menu-item>
       <el-menu-item index="group">组织</el-menu-item> -->
 
       <div style="position: absolute; right: 30px; top: 20px; font-size: 12px">

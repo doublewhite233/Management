@@ -8,7 +8,8 @@ const userSchema = new Schema({
   mail: { type: String, required: true }, // 通过邮箱登录
   password: { type: String, required: true },
   username: { type: String },
-  role: { type: String, default: 'user', enum: ['admin', 'user'] } // 用户身份
+  role: { type: String, default: 'user', enum: ['admin', 'user'] }, // 用户身份
+  extra: { type: Object }
 })
 
 const User = mongoose.model('User', userSchema)
