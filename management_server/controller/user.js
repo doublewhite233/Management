@@ -30,6 +30,18 @@ class user_controller {
       }
     })
   }
+  // 获取所有用户信息
+  async userData(req, res, next) {
+    let input = ''
+    if (req.query.input) input = req.query.input
+    UserModel.find({ $or: [{ username: { $regex: input }}, { mail: { $regex: input }}]}, '_id username mail', (err, user) => {
+      if (user) {
+        res.send({ code: 0, data: user })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
 }
 
 export default new user_controller()

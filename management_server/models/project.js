@@ -7,5 +7,12 @@ const Schema = mongoose.Schema
 const projectSchema = new Schema({
   name: { type: String, required: true },
   desc: { type: String },
-  leader: { type: String, required: true }
+  tag: { type: Array },
+  leader: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+  create_at: { type: Date, required: true },
+  update_at: { type: Date, required: true }
 })
+
+const Project = mongoose.model('Project', projectSchema)
+
+export default Project

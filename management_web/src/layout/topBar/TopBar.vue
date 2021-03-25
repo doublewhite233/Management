@@ -1,6 +1,6 @@
 <template>
   <div class="padding: 0">
-    <el-menu :default-active="$route.path" mode="horizontal" background-color="#212121" text-color="#fff" active-text-color="#409EFF" @select="handleSelect">
+    <el-menu :default-active="$route.meta.path" mode="horizontal" background-color="#212121" text-color="#fff" active-text-color="#409EFF" @select="handleSelect">
       <!-- 由于有无下拉菜单的标记不同需要在外包裹一层，包裹div失败，百度后采用template -->
       <template v-for="item in menuItemList">
         <el-menu-item v-if="!item.children" :key="item.path" :index="item.path">{{ item.name }}</el-menu-item>

@@ -1,6 +1,6 @@
 <template>
   <div style="height: 100%">
-    <el-menu default-active="1" style="height: 100%">
+    <el-menu :default-active="$route.path" style="height: 100%" @select="handleSelect">
       <slot name="header" />
 
       <template v-for="(item, index) in menuData">
@@ -34,6 +34,13 @@ export default {
           { divider: true },
           { name: '导航二', icon: 'el-icon-menu' }
         ]
+      }
+    }
+  },
+  methods: {
+    handleSelect(path) {
+      if (this.$route.path !== path) {
+        this.$router.push(path)
       }
     }
   }

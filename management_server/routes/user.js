@@ -20,4 +20,11 @@ router.post('/login', user_controller.userLogin)
   */
 router.post('/userinfo', user_controller.userInfo)
 
+// 获取所有用户信息
+/*
+  params:
+  input: [String], 用户名或邮箱查找的关键词
+  */
+router.get('/data', user_controller.userData)
+
 export default router

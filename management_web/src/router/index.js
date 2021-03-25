@@ -34,8 +34,21 @@ export const constantRoutes = [
     children: [{
       path: 'project',
       name: '项目',
+      redirect: '/project/backlog',
       component: () => import('@/views/project/Project.vue'),
-      meta: { path: '/project' }
+      meta: { path: '/project' },
+      children: [{
+        path: 'backlog',
+        name: '代办需求',
+        meta: { path: '/project' },
+        component: () => import('@/views/projectChild/backlog/Backlog.vue')
+      },
+      {
+        path: 'detail',
+        name: '项目详情',
+        meta: { path: '/project' },
+        component: () => import('@/views/projectChild/detail/Detail.vue')
+      }]
     }]
   }
   // {
@@ -56,7 +69,7 @@ export const adminRoutes = [
   {
     path: '/admin',
     component: Layout,
-    redirect: '/admin/user',
+    redirect: '/admin/project',
     name: '系统管理',
     children: [{
       path: 'project',
