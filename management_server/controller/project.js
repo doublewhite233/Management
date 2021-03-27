@@ -52,7 +52,7 @@ class project_controller {
   // 新建项目
   async create(req, res, next) {
     const { name, desc, tag, leader } = req.body
-    new ProjectModel({ name, desc, tag, leader, create_at: new Date(), update_at: new Date() }).save((err, data) => {
+    new ProjectModel({ name, desc, tag, leader, team: [leader], create_at: new Date(), update_at: new Date() }).save((err, data) => {
       if (data) {
         res.send({ code: 0, data: '新建项目成功！' })
       } else {
@@ -102,6 +102,30 @@ class project_controller {
         })
         res.send({ code: 0, data: tags })
       } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+  // 获取项目信息
+  async getProjectList(req, res, next) {
+    let input = ''
+    if (req.query.input) input = req.query.input
+    ProjectModel.find({ name: { $regex: input }}, '_id name', (err, doc) => {
+      if (doc) {
+        res.send({ code: 0, data: doc })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+  // 根据id获得项目信息
+  async getDataById(req, res, next) {
+    const { id } = req.body
+    ProjectModel.findById(id).populate('leader', 'username mail').populate({ path: 'team', populate: 'team', select: 'username mail' }).exec((err, project) => {
+      if (project) {
+        res.send({ code: 0, data: project })
+      } else {
+        console.log(err)
         res.send({ code: 1, data: 'error' })
       }
     })

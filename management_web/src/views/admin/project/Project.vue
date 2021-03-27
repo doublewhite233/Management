@@ -1,5 +1,5 @@
 <template>
-  <div style="padding: 20px">
+  <el-main>
     <div v-if="page.totalCount === 0" style="height: calc(100vh - 151px);">
       <empty>
         <template v-slot:text>
@@ -116,7 +116,7 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </span>
     </el-dialog>
-  </div>
+  </el-main>
 </template>
 
 <script>
@@ -248,7 +248,7 @@ export default {
       this.loading = true
       this.personOption = []
       const users = await getUserData(query.trim())
-      if (users.code === 0) {
+      if (users && users.code === 0) {
         users.data.forEach(i => {
           this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
         })

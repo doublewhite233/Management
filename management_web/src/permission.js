@@ -19,8 +19,12 @@ router.beforeEach((to, from, next) => {
         store.dispatch('getRoutes', res.role).then(routes => {
           resetRouter()
           router.addRoutes(routes)
+          // 确保动态路由已经完全加载
+          next({ ...to, replace: true })
         })
       })
+    } else {
+      next()
     }
     if (to.path === '/login') {
       next({ path: '/' })

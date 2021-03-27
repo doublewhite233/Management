@@ -9,6 +9,7 @@ const projectSchema = new Schema({
   desc: { type: String },
   tag: { type: Array },
   leader: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+  team: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   create_at: { type: Date, required: true },
   update_at: { type: Date, required: true }
 })

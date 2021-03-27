@@ -47,4 +47,18 @@ router.get('/data', project_controller.getData)
  // 获取项目标签
  router.get('/gettag', project_controller.getTag)
 
+// 获取项目信息
+/*
+  params:
+  input: [String], 查找的关键词
+  */
+  router.get('/projectlist', project_controller.getProjectList)
+
+// 根据id获得项目信息
+ /*
+  body:
+  _id: [required, String], 项目_id
+  */
+ router.post('/databyid', project_controller.getDataById)
+
 export default router

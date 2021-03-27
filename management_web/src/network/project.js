@@ -36,3 +36,18 @@ export function getTagList() {
     url: '/project/gettag'
   })
 }
+
+export function getProjectList(query) {
+  return request({
+    url: '/project/projectlist',
+    params: { input: query }
+  })
+}
+
+export function getProjectDetail(id) {
+  return request({
+    url: '/project/databyid',
+    method: 'post',
+    data: { id }
+  })
+}
