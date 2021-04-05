@@ -58,6 +58,7 @@ import { formatLogtoHour } from '@/utils/index.js'
 import { getUserData } from '@/network/user.js'
 import { getIssueType } from '@/network/issueType.js'
 import { createIssue } from '@/network/issue.js'
+import { logHistory } from '@/network/history.js'
 
 import Editor from '@/components/wangEditor/index.vue'
 
@@ -143,13 +144,14 @@ export default {
           this.$set(submitData, 'sprint', this.sprint === '' ? null : this.sprint)
           const res = await createIssue(submitData)
           if (res && res.code === 0) {
+            await logHistory(res.data._id, this.$store.state.user_info._id, 'create', null)
             this.$emit('success')
             this.$message({ message: '新建任务成功', type: 'success' })
           } else {
             this.$message({ message: '新建任务失败！', type: 'error' })
           }
+          this.dialogVisible = false
         }
-        this.dialogVisible = false
       })
     }
   }

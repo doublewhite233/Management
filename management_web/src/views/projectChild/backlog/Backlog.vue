@@ -28,7 +28,7 @@
             </v-contextmenu-item>
           </v-contextmenu>
 
-        <createIssueBtn @success="fetchData()" :sprint="i._id" />
+        <createIssueBtn @success="fetchData($store.state.project_info._id)" :sprint="i._id" />
       </el-collapse-item>
 
       <el-collapse-item name="backlog">
@@ -41,14 +41,15 @@
           <div v-for="item in issueInfo.null" :key="item._id" @contextmenu.prevent="rightClickIssue = item._id">
             <issueItem :data="item" v-contextmenu:backlog />
           </div>
+          <span/>
 
-          <v-contextmenu ref="backlog" v-if="issueInfo.null">
+          <v-contextmenu ref="backlog">
             <v-contextmenu-item v-for="i in sprintList" :key="i._id" :name="i._id" @click="handleMove(i._id)">
               {{`移入 ${i.name} `}}
             </v-contextmenu-item>
           </v-contextmenu>
         </div>
-        <createIssueBtn @success="fetchData()" />
+        <createIssueBtn @success="fetchData($store.state.project_info._id)" />
       </el-collapse-item>
     </el-collapse>
 
@@ -112,7 +113,6 @@ export default {
       callback()
     }
     return {
-      dataList: { a: [{ name: 'a' }, { name: 'b' }] },
       sprintList: [],
       issueInfo: {},
       rightClickIssue: '', // 右键点击后的issue id
@@ -136,7 +136,7 @@ export default {
   watch: {
     async loading(val, oldVal) {
       if (val) {
-        await this.fetchData()
+        await this.fetchData(this.$store.state.project_info._id)
       }
     },
     'editData.start_at': {
@@ -170,19 +170,19 @@ export default {
   },
   async mounted() {
     if (this.$store.state.project_info._id !== '') {
-      await this.fetchData()
+      await this.fetchData(this.$store.state.project_info._id)
     }
   },
   methods: {
-    async fetchData() {
+    async fetchData(project) {
       // 获取sprint信息
-      const { data } = await getSprintData(0, ['new', 'running'], this.$store.state.project_info._id)
+      const { data } = await getSprintData(0, ['new', 'running'], project)
       this.$store.commit(SET_LOADING_STATE, false)
       this.sprintList = data
       const sprintids = [null]
       this.sprintList.forEach(i => sprintids.push(i._id))
       // 根据project sprint信息获取任务信息并分类
-      const issueRes = await getIssueData(this.$store.state.project_info._id, sprintids)
+      const issueRes = await getIssueData(project, sprintids)
       this.issueInfo = {}
       issueRes.data.forEach(item => {
         if (!this.issueInfo[item.sprint]) {
@@ -199,7 +199,7 @@ export default {
       } else {
         this.$message({ message: '新建冲刺失败！', type: 'error' })
       }
-      await this.fetchData()
+      await this.fetchData(this.$store.state.project_info._id)
     },
     async handleDeleteSprint(id, name) {
       await this.$confirm(`您确定要删除${name}吗？`)
@@ -209,7 +209,7 @@ export default {
       } else {
         this.$message({ message: '删除冲刺失败！', type: 'error' })
       }
-      await this.fetchData()
+      await this.fetchData(this.$store.state.project_info._id)
     },
     handleStartSprint(item) {
       this.dialogVisible = true
@@ -267,7 +267,7 @@ export default {
             this.$message({ message: '现在已经有一个冲刺在进行中，请结束后再开始其他冲刺！', type: 'warning' })
           }
           this.dialogVisible = false
-          await this.fetchData()
+          await this.fetchData(this.$store.state.project_info._id)
         }
       })
     },
@@ -276,7 +276,7 @@ export default {
       const data = await moveIssueSprint(this.rightClickIssue, sprint)
       if (data && data.code === 0) {
         this.$message({ message: '移动成功！', type: 'success' })
-        await this.fetchData()
+        await this.fetchData(this.$store.state.project_info._id)
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
       }

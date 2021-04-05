@@ -8,7 +8,7 @@ class issue_controller {
     const { data } = req.body
     new IssueModel({ ...data, create_at: new Date(), update_at: new Date() }).save((err, doc) => {
       if (doc) {
-        res.send({ code: 0, data: '新建任务成功！' })
+        res.send({ code: 0, data: doc })
       } else {
         res.send({ code: 1, data: 'error' })
       }

@@ -5,6 +5,7 @@ import project from './project.js'
 import sprint from './sprint.js'
 import issue from './issue.js'
 import issueType from './issueType.js'
+import history from './history.js'
 
 export default app => {
   app.use('/user', user)
@@ -12,4 +13,5 @@ export default app => {
   app.use('/sprint', sprint)
   app.use('/issue', issue)
   app.use('/issuetype', issueType)
+  app.use('/history', history)
 }
