@@ -33,7 +33,8 @@ router.beforeEach((to, from, next) => {
     // 没有cookie，跳转登陆页面
     if (to.path !== '/login') {
       next({ path: '/login', replace: true })
+    } else {
+      next()
     }
   }
-  next()
 })

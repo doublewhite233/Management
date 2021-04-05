@@ -22,7 +22,8 @@
           </el-input>
         </el-col>
         <el-col :span="6">
-          <el-button type="primary" @click="handleCreate" style="float: right">新建项目</el-button>
+          <el-button type="primary" @click="handleCreate" style="float: right" :loading="loading">新建项目</el-button>
+           <el-button @click="handleShowTypeDia" style="float: right; margin-right: 10px;">配置任务类型</el-button>
         </el-col>
       </el-row>
       <el-table :data="projectData" :default-sort="sort" @sort-change="handleSort">
@@ -67,7 +68,7 @@
       </el-row>
     </div>
 
-    <el-dialog :title=dialogTitle :visible.sync="dialogVisible" width="50%">
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="50%">
       <el-form :model="projectForm" :rules="rules" label-position="left" ref="projectForm" style="padding: 0 20px">
         <el-form-item label="项目名称" label-width="80px" prop="name">
           <el-input v-model="projectForm.name" placeholder="请输入项目名称" maxlength="30" show-word-limit />
@@ -106,7 +107,7 @@
         </el-form-item>
         <el-form-item label="负责人" label-width="80px" prop="leader">
           <el-select v-model="projectForm.leader" filterable remote :remote-method="getPersonList" :loading="loading" @blur="$refs.projectForm.validateField('leader')">
-            <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value"></el-option>
+            <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -116,12 +117,41 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog title="编辑任务类型" :visible.sync="typeDiaVisible" width="50%" center>
+      <el-table :data="issueType">
+        <el-table-column prop="name" align="center" label="名称">
+          <template slot-scope="scope">
+            <span v-if="!scope.row.edit">{{ scope.row.name }}</span>
+            <el-input v-else v-model="scope.row.name" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="desc" align="center" label="描述">
+          <template slot-scope="scope">
+            <span v-if="!scope.row.edit">{{ scope.row.desc }}</span>
+            <el-input v-else v-model="scope.row.desc" />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="150">
+          <template slot-scope="scope">
+            <el-button v-if="!scope.row.edit" @click="handleEditType(scope.$index)" size="mini">修改</el-button>
+            <el-button v-else @click="handleSubmitType(scope)" size="mini">保存</el-button>
+            <el-button @click="handleDeleteType(scope)" type="danger" size="mini">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="handleCreateType">新建类型</el-button>
+      </span>
+    </el-dialog>
   </el-main>
 </template>
 
 <script>
 import { getProjectData, createProject, deleteProject, updateProject, getTagList } from '@/network/project.js'
 import { getUserData } from '@/network/user.js'
+import { getIssueType, updateIssueType, deleteIssueType } from '@/network/issueType.js'
 import { formatDate } from '@/utils/index.js'
 
 import Empty from '@/components/empty/Empty'
@@ -147,8 +177,10 @@ export default {
       personOption: [],
       rules: {
         name: { required: true, message: '请输入项目名称', trigger: 'blur' },
-        leader: { required: true, message: '请选择负责人', trigger: 'blur' }
-      }
+        leader: { required: true, message: '请选择负责人', trigger: ['blur', 'change'] }
+      },
+      typeDiaVisible: false,
+      issueType: []
     }
   },
   mounted() {
@@ -182,6 +214,7 @@ export default {
       this.personOption = []
       this.dialogVisible = true
       this.dialogTitle = '新建项目'
+      this.$nextTick(() => { this.$refs.projectForm.clearValidate() })
     },
     handleUpdate(data) {
       const tempArr = Object.keys(data)
@@ -194,6 +227,7 @@ export default {
       })
       this.dialogVisible = true
       this.dialogTitle = '修改项目信息'
+      this.$nextTick(() => { this.$refs.projectForm.clearValidate() })
     },
     async handleDelete(id) {
       await this.$confirm('您确定要删除该项目及其所有相关数据吗？')
@@ -292,6 +326,43 @@ export default {
           this.dialogVisible = false
         }
       })
+    },
+
+    async handleShowTypeDia() {
+      this.loading = true
+      const { data } = await getIssueType()
+      data.forEach(i => { i.edit = false })
+      this.issueType = JSON.parse(JSON.stringify(data))
+      this.loading = false
+      this.typeDiaVisible = true
+    },
+    handleCreateType() {
+      this.issueType.push({ name: '', desc: '', edit: true })
+    },
+    handleEditType(index) {
+      this.issueType[index].edit = true
+    },
+    async handleSubmitType(data) {
+      const res = await updateIssueType(data.row)
+      if (res && res.code === 0) {
+        this.$message({ message: '保存成功！', type: 'success' })
+      } else {
+        this.$message({ message: '保存失败！', type: 'error' })
+      }
+      this.issueType[data.$index].edit = false
+    },
+    async handleDeleteType(data) {
+      if (data.row._id) {
+        const res = await deleteIssueType(data.row._id)
+        if (res && res.code === 0) {
+          this.$message({ message: '删除成功！', type: 'success' })
+          this.issueType.splice(data.$index, 1)
+        } else {
+          this.$message({ message: '删除失败！', type: 'error' })
+        }
+      } else {
+        this.issueType.splice(data.$index, 1)
+      }
     }
   }
 }

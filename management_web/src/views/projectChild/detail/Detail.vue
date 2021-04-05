@@ -1,5 +1,5 @@
 <template>
-  <el-main v-loading="$store.state.loading" style="margin-top: 1px">
+  <el-main v-loading="$store.state.loading" class="main">
     <el-card v-if="Object.keys(projectData).length > 0">
       <div slot="header" class="clearfix"><span>项目信息</span></div>
       <h3 class="item">{{ projectData.name }}</h3>
@@ -86,6 +86,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.main {
+  margin-top: 1px;
+  height: calc(100vh - 111px);
+}
+
 .item {
   margin-bottom: 18px;
 }

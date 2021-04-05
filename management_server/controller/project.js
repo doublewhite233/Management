@@ -77,7 +77,6 @@ class project_controller {
     const { _id } = req.body
     ProjectModel.findByIdAndUpdate({ _id }, { ... req.body, update_at: new Date() }, (err, oldDoc) => {
       if (oldDoc) {
-        console.log(oldDoc)
         res.send({ code: 0, data: '修改项目成功！' })
       } else {
         res.send({ code: 1, data: 'error' })

@@ -15,6 +15,12 @@ import './styles/index.scss'
 import ElementUI from 'element-ui'
 Vue.use(ElementUI)
 
+// v-contextmenu
+import contentmenu from 'v-contextmenu'
+import 'v-contextmenu/dist/index.css'
+
+Vue.use(contentmenu)
+
 Vue.config.productionTip = false
 
 new Vue({
