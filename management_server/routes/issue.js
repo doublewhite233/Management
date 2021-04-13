@@ -16,7 +16,8 @@ router.post('/create', issue_controller.create)
 /*
   body:
   project: [String, required], 项目_id;
-  sprint: [Array], Sprint_id
+  sprint: [Array], Sprint_id;
+  user: [Array], user_id
   */
 router.post('/data', issue_controller.getData)
 
@@ -27,5 +28,13 @@ router.post('/data', issue_controller.getData)
   sprint: [Stirng, required], Sprint_id
   */
 router.post('/move', issue_controller.move)
+
+// 更新任务状态
+/*
+  body:
+  _id: [String, required], _id;
+  data: 相关数据
+  */
+router.post('/update', issue_controller.update)
 
 export default router

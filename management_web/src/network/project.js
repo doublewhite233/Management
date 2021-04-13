@@ -51,3 +51,27 @@ export function getProjectDetail(id) {
     data: { id }
   })
 }
+
+export function getTeamInfo(_id) {
+  return request({
+    url: '/project/team',
+    method: 'post',
+    data: { _id }
+  })
+}
+
+export function addTeamMember(project, user) {
+  return request({
+    url: '/project/addteam',
+    method: 'post',
+    data: { _id: project, user_id: user }
+  })
+}
+
+export function deleteTeamMember(project, user) {
+  return request({
+    url: '/project/deleteteam',
+    method: 'post',
+    data: { _id: project, user_id: user }
+  })
+}

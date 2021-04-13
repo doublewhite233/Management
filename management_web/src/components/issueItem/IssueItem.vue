@@ -1,19 +1,24 @@
 <template>
-  <div class="content">
+  <div :class="ishovercss ? 'content active' : 'content'">
     <el-row>
-      <el-col :span="18">
-        <h3>{{ data.name }}</h3>
+      <el-col :span="size === 'mini' ? 24 : 18">
+        <div class="issue-title">{{ data.name }}</div>
       </el-col>
-      <el-col :span="6">
-        <span style="float: right">{{ data.assignee ? `${data.assignee.username}(${data.assignee.mail})` : '暂未指派' }}</span>
+      <el-col :span="size === 'mini' ? 24 : 6">
+        <div v-if="size === 'mini'" class="mini-text">{{ data.assignee ? `${data.assignee.username}(${data.assignee.mail})` : '暂未指派' }}</div>
+        <span v-else style="float: right">{{ data.assignee ? `${data.assignee.username}(${data.assignee.mail})` : '暂未指派' }}</span>
       </el-col>
     </el-row>
 
     <el-row>
-      <el-col :span="18">
-        <span>{{ `重要程度：${data.priority} · 类型：${data.type.name}` }}</span>
+      <el-col :span="size === 'mini' ? 24 : 18">
+        <span v-if="size === 'mini'">
+          <div class="mini-text">{{ `重要程度：${data.priority}` }}</div>
+          <div class="mini-text">{{ `类型：${data.type.name}` }}</div>
+        </span>
+        <span v-else>{{ `重要程度：${data.priority} · 类型：${data.type.name}` }}</span>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="size === 'mini' ? 24 : 6">
         <span style="float: right" class="estimate">{{ data.logtime ? getLog(data.logtime) : '-' }}</span>
       </el-col>
     </el-row>
@@ -30,6 +35,14 @@ export default {
       default() {
         return {}
       }
+    },
+    ishovercss: {
+      type: Boolean,
+      default: false
+    },
+    size: {
+      type: String,
+      default: 'normal'
     }
   },
   computed: {
@@ -48,16 +61,33 @@ export default {
 <style lang="scss" scoped>
 .content {
   padding: 10px 20px;
-  border-bottom: 1px solid #DCDFE6;
+  border-bottom: 1px solid #E4E7ED;
+  background-color: #FFFFFF;
+  border-radius: 10px;
 }
 
-.content:hover {
-  background-color: #DCDFE6;
+.active:hover {
+  background-color: #F2F6FC;
+}
+
+.issue-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  padding-bottom: 7px;
+}
+
+.mini-text {
+  font-size: 12px;
+  padding: 4px 0;
+  font-weight: normal;
 }
 
 .estimate {
   border-radius: 25px;
-  background: #ccc;
+  background: #DCDFE6;
   padding: 3px 20px;
+  font-size: 13px;
+  font-weight: normal;
 }
 </style>

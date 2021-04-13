@@ -27,7 +27,7 @@
           <editor @change="handleEditorChange" :content="editData.desc" />
         </el-form-item>
         <el-form-item label="指派给" label-width="80px">
-          <el-select v-model="editData.assignee" filterable remote :remote-method="getPersonList" :loading="loading">
+          <el-select v-model="editData.assignee" filterable>
             <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -47,7 +47,7 @@
 
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button type="primary" @click="handleSubmit" :loading="loading">确定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -55,7 +55,7 @@
 
 <script>
 import { formatLogtoHour } from '@/utils/index.js'
-import { getUserData } from '@/network/user.js'
+import { getTeamInfo } from '@/network/project.js'
 import { getIssueType } from '@/network/issueType.js'
 import { createIssue } from '@/network/issue.js'
 import { logHistory } from '@/network/history.js'
@@ -87,9 +87,9 @@ export default {
     }
     return {
       dialogVisible: false,
+      loading: false,
       editData: { name: '', type: '', priority: 3, desc: '', assignee: '', estimate: '', due_at: '' },
       issueType: [],
-      loading: false,
       personOption: [],
       rules: {
         name: { required: true, message: '请输入任务名称', trigger: 'blur' },
@@ -105,30 +105,31 @@ export default {
     async fetchData() {
       const types = await getIssueType()
       this.issueType = types.data
+      const teamData = await getTeamInfo(this.$store.state.project_info._id)
+      if (teamData && teamData.data && teamData.data.team) {
+        teamData.data.team.forEach(i => {
+          this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
+        })
+      }
     },
 
     handleClick() {
       this.dialogVisible = true
+      Object.keys(this.editData).forEach(k => {
+        if (k === 'priority') {
+          this.editData[k] = 3
+        } else {
+          this.editData[k] = ''
+        }
+      })
     },
     handleEditorChange(content) {
       this.editData.desc = content
     },
-    async getPersonList(query) {
-      this.loading = true
-      this.personOption = []
-      const users = await getUserData(query.trim())
-      if (users && users.code === 0) {
-        users.data.forEach(i => {
-          this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
-        })
-      } else {
-        this.$message({ message: '似乎出了一点问题...', type: 'error' })
-      }
-      this.loading = false
-    },
     async handleSubmit() {
       this.$refs.dialogForm.validate(async(valid) => {
         if (valid) {
+          this.loading = true
           const submitData = {}
           Object.keys(this.editData).forEach(k => {
             if (this.editData[k] !== '' && this.editData[k] !== undefined && this.editData[k] !== null) {
@@ -151,6 +152,7 @@ export default {
             this.$message({ message: '新建任务失败！', type: 'error' })
           }
           this.dialogVisible = false
+          this.loading = false
         }
       })
     }

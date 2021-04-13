@@ -60,9 +60,12 @@ export default {
     async handleCommand(command) {
       // 退出登录
       if (command === 'logout') {
-        await this.$confirm('您确定要退出登录吗？')
-        this.$store.dispatch('logout')
-        this.$router.push('/login')
+        await this.$confirm('您确定要退出登录吗？').then(() => {
+          this.$store.dispatch('logout')
+          this.$router.push('/login')
+        }).catch(() => {
+          this.$message.info('已取消')
+        })
       }
     }
   }

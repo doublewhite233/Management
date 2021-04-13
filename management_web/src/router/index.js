@@ -44,6 +44,18 @@ export const constantRoutes = [
         component: () => import('@/views/projectChild/backlog/Backlog.vue')
       },
       {
+        path: 'dashboard',
+        name: '看板',
+        meta: { path: '/project' },
+        component: () => import('@/views/projectChild/dashboard/Dashboard.vue')
+      },
+      {
+        path: 'statistics',
+        name: '统计报表',
+        meta: { path: '/project' },
+        component: () => import('@/views/projectChild/statistics/Statistics.vue')
+      },
+      {
         path: 'detail',
         name: '项目详情',
         meta: { path: '/project' },

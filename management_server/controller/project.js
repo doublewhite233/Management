@@ -124,7 +124,42 @@ class project_controller {
       if (project) {
         res.send({ code: 0, data: project })
       } else {
-        console.log(err)
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
+  // 根据id获得项目成员信息
+  async getTeam(req, res, next) {
+    const { _id } = req.body
+    ProjectModel.findById(_id).populate({ path: 'team', populate: 'team', select: 'username mail' }).exec((err, project) => {
+      if (project) {
+        res.send({ code: 0, data: project })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
+  // 添加项目成员
+  async addTeam(req, res, next) {
+    const { _id, user_id } = req.body
+    ProjectModel.findByIdAndUpdate({ _id }, { $addToSet: { team: user_id }}, (err, doc) => {
+      if (doc) {
+        res.send({ code: 0, data: '添加成员成功！' })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
+  // 删除项目成员
+  async deleteTeam(req, res, next) {
+    const { _id, user_id } = req.body
+    ProjectModel.findByIdAndUpdate({ _id }, { $pull: { team: user_id }}, (err, doc) => {
+      if (doc) {
+        res.send({ code: 0, data: '删除成员成功！' })
+      } else {
         res.send({ code: 1, data: 'error' })
       }
     })

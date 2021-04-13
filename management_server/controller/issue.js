@@ -19,8 +19,11 @@ class issue_controller {
   async getData(req, res, next) {
     const { project } = req.body
     const findQuery = { project: project }
-    if (req.body.sprint) {
+    if (req.body.sprint && req.body.sprint.length !== 0) {
       findQuery.sprint = { $in: req.body.sprint }
+    }
+    if (req.body.user && req.body.user.length !== 0) {
+      findQuery.assignee = { $in: req.body.user }
     }
     const query = IssueModel.find(findQuery, { desc: 0 }).populate('type', 'name').populate('assigner assignee', 'username mail').sort({ 'priority': 1 })
     query.exec(async (err, doc) => {
@@ -35,8 +38,21 @@ class issue_controller {
   // 移动任务至其他sprint
   async move(req, res, next) {
     const { _id, sprint } = req.body
-    IssueModel.findByIdAndUpdate({ _id }, { sprint, update_at: new Date() }, (err, oldDoc) => {
-      if (oldDoc) {
+    IssueModel.findByIdAndUpdate({ _id }, { sprint, update_at: new Date() }, (err, doc) => {
+      if (doc) {
+        res.send({ code: 0, data: '修改成功！' })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
+  // 更新任务状态
+  async update(req, res, next) {
+    const { _id, data } = req.body
+    IssueModel.findByIdAndUpdate({ _id }, { ...data, update_at: new Date() }, (err, doc) => {
+      console.log(err)
+      if (doc) {
         res.send({ code: 0, data: '修改成功！' })
       } else {
         res.send({ code: 1, data: 'error' })

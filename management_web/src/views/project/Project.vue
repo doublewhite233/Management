@@ -8,7 +8,7 @@
     </div>
 
     <el-row v-else>
-      <el-col :span="4" style="height: calc(100vh - 111px); margin-top: 1px">
+      <el-col :span="4" style="height: calc(100vh - 112px); margin-top: 2px">
         <side-bar :menuData="sideBarData">
           <template v-slot:header>
             <el-row class="title-warp">

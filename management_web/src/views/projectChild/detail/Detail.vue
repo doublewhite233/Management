@@ -20,18 +20,19 @@
         <el-card class="cards" style="margin-right: 10px">
           <div slot="header" class="clearfix">
             <span>团队信息</span>
-            <el-button style="float: right; padding: 3px 0" type="text">显示更多</el-button>
+            <el-button style="float: right; padding: 3px 0" type="text" @click="showMoreTeam">显示更多</el-button>
           </div>
-          <el-col v-for="i in projectData.team" :key="i._id" :span="12" class="item">
+          <el-col v-for="i in (projectData.team || '').slice(0,7)" :key="i._id" :span="12" class="item">
             <i class="el-icon-user-solid" />
             {{ i.username }}
           </el-col>
           <el-col v-if="$store.state.user_info.role === 'admin'" :span="12" class="item">
             <i class="el-icon-plus" />
-            <span>团队管理</span>
+            <el-link :underline="false" @click="showMoreTeam" style="font-size: 16px;">团队管理</el-link>
           </el-col>
         </el-card>
       </el-col>
+
       <el-col :span="12">
         <el-card class="cards" style="margin-left: 10px">
           <div slot="header" class="clearfix">
@@ -41,18 +42,55 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="60%">
+      <el-table :data="projectData.team" v-if="dialogTitle === '团队信息'">
+        <el-table-column prop="username" align="center" label="用户名" />
+        <el-table-column prop="mail" align="center" label="邮箱" />
+        <el-table-column label="操作" align="center" width="150" v-if="$store.state.user_info.role === 'admin'">
+          <template slot-scope="scope">
+            <el-button @click="handleDeleteTeam(scope)" type="danger" size="mini" :disabled="scope.row._id === projectData.leader._id">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <span slot="footer">
+        <span v-if="dialogTitle === '团队信息'">
+          <el-popover v-model="popVisible" placement="top" trigger="click" width="400" v-if="$store.state.user_info.role === 'admin'">
+            <el-row>
+              <el-col :span="20">
+                <el-select style="width: 95%;" v-model="addUser" filterable remote :remote-method="getPersonList" :loading="selectLoading" placeholder="输入进行查找" clearable>
+                  <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
+              </el-col>
+              <el-col :span="4">
+                <el-button type="success" @click="handleAddTeam" :disabled="addUser.trim() === ''">确认</el-button>
+              </el-col>
+            </el-row>
+            <el-button type="primary" slot="reference">添加成员</el-button>
+          </el-popover>
+        </span>
+      </span>
+    </el-dialog>
   </el-main>
 </template>
 
 <script>
-import { getProjectDetail } from '@/network/project.js'
+import { getProjectDetail, addTeamMember, deleteTeamMember } from '@/network/project.js'
+import { getUserData } from '@/network/user.js'
 import { formatDate } from '@/utils/index.js'
 import { SET_LOADING_STATE } from '@/store/mutation-types.js'
 
 export default {
   data() {
     return {
-      projectData: {}
+      projectData: {},
+      dialogVisible: false,
+      dialogTitle: '',
+      selectLoading: false,
+      addUser: '',
+      personOption: [],
+      popVisible: false
     }
   },
   computed: {
@@ -80,6 +118,51 @@ export default {
       const { data } = await getProjectDetail(id)
       this.$store.commit(SET_LOADING_STATE, false)
       this.projectData = data
+    },
+    showMoreTeam() {
+      this.dialogTitle = '团队信息'
+      this.dialogVisible = true
+    },
+    async handleDeleteTeam(scope) {
+      await this.$confirm('您确定要删除这个成员吗？').then(async() => {
+        const data = await deleteTeamMember(this.$store.state.project_info._id, scope.row._id)
+        if (data && data.code === 0) {
+          this.$message({ message: '删除项目成员成功！', type: 'success' })
+          await this.fetchData(this.$store.state.project_info._id)
+        } else {
+          this.$message({ message: '删除失败，似乎出了一点问题...', type: 'error' })
+        }
+      }).catch(() => {
+        this.$message.info('已取消删除')
+      })
+    },
+    async handleAddTeam() {
+      if (this.projectData.team.some(user => user._id === this.addUser)) {
+        this.$message({ message: '该用户已是项目成员！', type: 'warning' })
+      } else {
+        const data = await addTeamMember(this.$store.state.project_info._id, this.addUser)
+        if (data && data.code === 0) {
+          this.$message({ message: '添加项目成员成功！', type: 'success' })
+          await this.fetchData(this.$store.state.project_info._id)
+        } else {
+          this.$message({ message: '添加失败，似乎出了一点问题...', type: 'error' })
+        }
+      }
+      this.addUser = ''
+      this.popVisible = false
+    },
+    async getPersonList(query) {
+      this.selectLoading = true
+      this.personOption = []
+      const users = await getUserData(query.trim())
+      if (users && users.code === 0) {
+        users.data.forEach(i => {
+          this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
+        })
+      } else {
+        this.$message({ message: '似乎出了一点问题...', type: 'error' })
+      }
+      this.selectLoading = false
     }
   }
 }

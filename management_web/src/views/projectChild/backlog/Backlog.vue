@@ -1,5 +1,13 @@
 <template>
   <el-main v-loading="$store.state.loading" class="main">
+    <el-row style="margin-bottom: 20px;">
+      <el-col :span="10">
+        <el-select placeholder="输入人员进行查找" v-model="searchList" filterable multiple reserve-keyword clearable style="width: 100%">
+          <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-col>
+    </el-row>
+
     <el-collapse v-model="activeNames">
 
       <el-collapse-item v-for="i in sprintList" :key="i._id" :name="i._id">
@@ -15,11 +23,13 @@
           </span>
         </div>
 
+        <span v-if="i.state === 'running'">{{ `起止日期： ${getDate(i.start_at)} - ${getDate(i.end_at)}` }}</span>
+
         <div v-if="!issueInfo[i._id]" style="height: 300px"><empty /></div>
 
         <div v-else style="margin-bottom: 10px;">
           <div v-for="item in issueInfo[i._id]" :key="item._id" @contextmenu.prevent="rightClickIssue = item._id">
-            <issueItem :data="item" v-contextmenu:sprint />
+            <issueItem :data="item" :ishovercss="true" v-contextmenu:sprint />
           </div>
         </div>
         <v-contextmenu ref="sprint">
@@ -39,7 +49,7 @@
         <div v-if="!issueInfo.null" style="height: 300px"><empty /></div>
         <div v-else style="margin-bottom: 10px;">
           <div v-for="item in issueInfo.null" :key="item._id" @contextmenu.prevent="rightClickIssue = item._id">
-            <issueItem :data="item" v-contextmenu:backlog />
+            <issueItem :data="item" :ishovercss="true" v-contextmenu:backlog />
           </div>
           <span/>
 
@@ -92,8 +102,10 @@
 
 <script>
 import { getSprintData, createSprint, deleteSprint, updateSprint } from '@/network/sprint.js'
+import { getTeamInfo } from '@/network/project.js'
 import { getIssueData, moveIssueSprint } from '@/network/issue.js'
 import { SET_LOADING_STATE } from '@/store/mutation-types.js'
+import { formatDate, debounce } from '@/utils/index.js'
 
 import issueItem from '@/components/issueItem/IssueItem.vue'
 import createIssueBtn from '@/components/createIssueBtn/CreateIssueBtn.vue'
@@ -121,6 +133,8 @@ export default {
       dialogVisible: false,
       dialogTitle: '',
       editData: { name: '', duration: '2w', start_at: '', end_at: '', goal: '' },
+      searchList: [],
+      personOption: [],
       rules: {
         name: { required: true, message: '请输入冲刺名称', trigger: 'blur' },
         duration: { required: true, message: '请选择持续时间', trigger: 'blur' }
@@ -131,6 +145,9 @@ export default {
   computed: {
     loading() {
       return this.$store.state.loading
+    },
+    getDate() {
+      return (date) => formatDate(date, 'yy/MM/dd hh:mm')
     }
   },
   watch: {
@@ -166,11 +183,24 @@ export default {
           }
         }
       }
+    },
+    searchList: {
+      handler() {
+        this.debounceInput(this)
+      },
+      deep: true
     }
   },
   async mounted() {
     if (this.$store.state.project_info._id !== '') {
       await this.fetchData(this.$store.state.project_info._id)
+      // 获取成员列表
+      const teamData = await getTeamInfo(this.$store.state.project_info._id)
+      if (teamData && teamData.data && teamData.data.team) {
+        teamData.data.team.forEach(i => {
+          this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
+        })
+      }
     }
   },
   methods: {
@@ -182,7 +212,7 @@ export default {
       const sprintids = [null]
       this.sprintList.forEach(i => sprintids.push(i._id))
       // 根据project sprint信息获取任务信息并分类
-      const issueRes = await getIssueData(project, sprintids)
+      const issueRes = await getIssueData(project, sprintids, this.searchList)
       this.issueInfo = {}
       issueRes.data.forEach(item => {
         if (!this.issueInfo[item.sprint]) {
@@ -192,24 +222,30 @@ export default {
       })
     },
     async handleCreateSprint() {
-      await this.$confirm('您确定要新建一个冲刺吗？')
-      const res = await createSprint('New Sprint', this.$store.state.project_info._id)
-      if (res && res.code === 0) {
-        this.$message({ message: res.data, type: 'success' })
-      } else {
-        this.$message({ message: '新建冲刺失败！', type: 'error' })
-      }
-      await this.fetchData(this.$store.state.project_info._id)
+      await this.$confirm('您确定要新建一个冲刺吗？').then(async() => {
+        const res = await createSprint('New Sprint', this.$store.state.project_info._id)
+        if (res && res.code === 0) {
+          this.$message({ message: res.data, type: 'success' })
+        } else {
+          this.$message({ message: '新建冲刺失败！', type: 'error' })
+        }
+        await this.fetchData(this.$store.state.project_info._id)
+      }).catch(() => {
+        this.$message.info('已取消')
+      })
     },
     async handleDeleteSprint(id, name) {
-      await this.$confirm(`您确定要删除${name}吗？`)
-      const res = await deleteSprint(id)
-      if (res && res.code === 0) {
-        this.$message({ message: res.data, type: 'success' })
-      } else {
-        this.$message({ message: '删除冲刺失败！', type: 'error' })
-      }
-      await this.fetchData(this.$store.state.project_info._id)
+      await this.$confirm(`您确定要删除${name}吗？`).then(async() => {
+        const res = await deleteSprint(id)
+        if (res && res.code === 0) {
+          this.$message({ message: res.data, type: 'success' })
+        } else {
+          this.$message({ message: '删除冲刺失败！', type: 'error' })
+        }
+        await this.fetchData(this.$store.state.project_info._id)
+      }).catch(() => {
+        this.$message.info('已取消删除')
+      })
     },
     handleStartSprint(item) {
       this.dialogVisible = true
@@ -280,7 +316,11 @@ export default {
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
       }
-    }
+    },
+
+    debounceInput: debounce(async(that) => {
+      await that.fetchData(that.$store.state.project_info._id)
+    }, 500)
   }
 }
 </script>

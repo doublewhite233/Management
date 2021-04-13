@@ -23,6 +23,15 @@ function padLeftZero(str) {
   return ('00' + str).substr(str.length)
 }
 
+export function getDateSub(start, end) {
+  const time = end.getTime() - start.getTime()
+  const day = parseInt(time / (1000 * 60 * 60 * 24))
+  const hour = parseInt(time % (1000 * 60 * 60 * 24) / (1000 * 60 * 60))
+  const minute = parseInt(time % (1000 * 60 * 60) / (1000 * 60))
+  const second = parseInt(time % (1000 * 60) / 1000)
+  return { day, hour, minute, second }
+}
+
 // input 1d 1h get 9(h)
 // change (if 1d = 8h, change = 8)
 export function formatLogtoHour(input, change) {
@@ -55,4 +64,15 @@ export function formatHourtoLog(input, change) {
   if (d > 0) res.d = d
   if (h > 0) res.h = h
   return res
+}
+
+export function debounce(fn, delay) {
+  let timer = null
+
+  return (...args) => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => {
+      fn.apply(this, args)
+    }, delay)
+  }
 }

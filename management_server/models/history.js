@@ -7,7 +7,8 @@ const Schema = mongoose.Schema
 const historySchema = new Schema({
   value: { type: Number }, // 单位h, 记录log
   issue: { type: Schema.Types.ObjectId, ref: 'Issue', required: true },
-  type: { type: String, enum: ['create', 'start', 'log'] },
+  type: { type: String, enum: ['create', 'todo', 'inprogress', 'log', 'testing', 'verified', 'closed'] },
+  // todo: change state to todo; create: first state when create[type=todo]
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   create_at: { type: Date, required: true }
 })

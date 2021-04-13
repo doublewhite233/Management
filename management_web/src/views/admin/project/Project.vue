@@ -141,7 +141,7 @@
         </el-table-column>
       </el-table>
 
-      <span slot="footer" class="dialog-footer">
+      <span slot="footer">
         <el-button type="primary" @click="handleCreateType">新建类型</el-button>
       </span>
     </el-dialog>
@@ -230,14 +230,17 @@ export default {
       this.$nextTick(() => { this.$refs.projectForm.clearValidate() })
     },
     async handleDelete(id) {
-      await this.$confirm('您确定要删除该项目及其所有相关数据吗？')
-      const res = await deleteProject(id)
-      if (res && res.code === 0) {
-        this.$message({ message: res.data, type: 'success' })
-      } else {
-        this.$message({ message: '删除项目失败！', type: 'error' })
-      }
-      this.fetchData()
+      await this.$confirm('您确定要删除该项目及其所有相关数据吗？').then(async() => {
+        const res = await deleteProject(id)
+        if (res && res.code === 0) {
+          this.$message({ message: res.data, type: 'success' })
+        } else {
+          this.$message({ message: '删除项目失败！', type: 'error' })
+        }
+        this.fetchData()
+      }).catch(() => {
+        this.$message.info('已取消删除')
+      })
     },
     handleSort(data) {
       // 回到第一页
@@ -352,17 +355,21 @@ export default {
       this.issueType[data.$index].edit = false
     },
     async handleDeleteType(data) {
-      if (data.row._id) {
-        const res = await deleteIssueType(data.row._id)
-        if (res && res.code === 0) {
-          this.$message({ message: '删除成功！', type: 'success' })
-          this.issueType.splice(data.$index, 1)
+      await this.$confirm('您确定要删除该任务类型吗？').then(async() => {
+        if (data.row._id) {
+          const res = await deleteIssueType(data.row._id)
+          if (res && res.code === 0) {
+            this.$message({ message: '删除成功！', type: 'success' })
+            this.issueType.splice(data.$index, 1)
+          } else {
+            this.$message({ message: '删除失败！', type: 'error' })
+          }
         } else {
-          this.$message({ message: '删除失败！', type: 'error' })
+          this.issueType.splice(data.$index, 1)
         }
-      } else {
-        this.issueType.splice(data.$index, 1)
-      }
+      }).catch(() => {
+        this.$message.info('已取消删除')
+      })
     }
   }
 }

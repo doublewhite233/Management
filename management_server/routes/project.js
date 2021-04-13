@@ -61,4 +61,27 @@ router.get('/projectlist', project_controller.getProjectList)
   */
 router.post('/databyid', project_controller.getDataById)
 
+// 根据id获得项目成员信息
+ /*
+  body:
+  _id: [required, String], 项目_id
+  */
+router.post('/team', project_controller.getTeam)
+
+// 添加项目成员
+ /*
+  body:
+  _id: [required, String], 项目_id;
+  user_id: [required, String], 用户_id
+  */
+router.post('/addteam', project_controller.addTeam)
+
+// 删除项目成员
+ /*
+  body:
+  _id: [required, String], 项目_id;
+  user_id: [required, String], 用户_id
+  */
+router.post('/deleteteam', project_controller.deleteTeam)
+
 export default router

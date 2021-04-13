@@ -8,11 +8,11 @@ export function createIssue(data) {
   })
 }
 
-export function getIssueData(project, sprint) {
+export function getIssueData(project, sprint = null, user = null) {
   return request({
     url: '/issue/data',
     method: 'post',
-    data: { project, sprint }
+    data: { project, sprint, user }
   })
 }
 
@@ -21,5 +21,13 @@ export function moveIssueSprint(_id, sprint) {
     url: '/issue/move',
     method: 'post',
     data: { _id, sprint }
+  })
+}
+
+export function updateIssue(_id, data) {
+  return request({
+    url: '/issue/update',
+    method: 'post',
+    data: { _id, data }
   })
 }
