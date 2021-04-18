@@ -63,6 +63,7 @@ export function formatHourtoLog(input, change) {
   if (w > 0) res.w = w
   if (d > 0) res.d = d
   if (h > 0) res.h = h
+  if (Object.keys(res).length === 0) res.h = 0
   return res
 }
 

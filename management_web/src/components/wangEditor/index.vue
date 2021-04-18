@@ -12,6 +12,10 @@ export default {
     content: {
       type: String,
       default: ''
+    },
+    height: {
+      type: Number,
+      default: 300
     }
   },
   data() {
@@ -20,7 +24,10 @@ export default {
     }
   },
   mounted() {
+    this.$bus.$on('clear-editor', this.clear)
     this.editor = new E(this.$refs.editorElem)
+    this.editor.zIndex.baseZIndex = 100
+    this.editor.config.height = this.height
     this.$nextTick(() => {
       this.editor.txt.html(this.content)
     })
@@ -28,6 +35,14 @@ export default {
       this.$emit('change', newHtml)
     }
     this.editor.create()
+  },
+  destroyed() {
+    this.$bus.$off('clear-editor', this.clear)
+  },
+  methods: {
+    clear() {
+      this.editor.txt.html('<p><br></p>')
+    }
   }
 }
 </script>

@@ -104,6 +104,7 @@
 import { getSprintData, createSprint, deleteSprint, updateSprint } from '@/network/sprint.js'
 import { getTeamInfo } from '@/network/project.js'
 import { getIssueData, moveIssueSprint } from '@/network/issue.js'
+import { logHistory } from '@/network/history.js'
 import { SET_LOADING_STATE } from '@/store/mutation-types.js'
 import { formatDate, debounce } from '@/utils/index.js'
 
@@ -201,6 +202,15 @@ export default {
           this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
         })
       }
+      // 如果有正在进行中的sprint，打开collapse
+      this.sprintList.find(i => {
+        if (i.state === 'running') {
+          if (this.activeNames.indexOf(i._id) === -1) {
+            this.activeNames.push(i._id)
+          }
+        }
+        return i.state === 'running'
+      })
     }
   },
   methods: {
@@ -312,6 +322,7 @@ export default {
       const data = await moveIssueSprint(this.rightClickIssue, sprint)
       if (data && data.code === 0) {
         this.$message({ message: '移动成功！', type: 'success' })
+        await logHistory(this.$store.state.project_info._id, this.rightClickIssue, this.$store.state.user_info._id, 'update', null)
         await this.fetchData(this.$store.state.project_info._id)
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })

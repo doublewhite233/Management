@@ -16,6 +16,14 @@ export function getIssueData(project, sprint = null, user = null) {
   })
 }
 
+export function getIssueDataByID(_id) {
+  return request({
+    url: '/issue/databyid',
+    method: 'post',
+    data: { _id }
+  })
+}
+
 export function moveIssueSprint(_id, sprint) {
   return request({
     url: '/issue/move',
@@ -29,5 +37,13 @@ export function updateIssue(_id, data) {
     url: '/issue/update',
     method: 'post',
     data: { _id, data }
+  })
+}
+
+export function deleteIssue(_id) {
+  return request({
+    url: '/issue/delete',
+    method: 'post',
+    data: { _id }
   })
 }

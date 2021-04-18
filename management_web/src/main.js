@@ -11,6 +11,9 @@ import 'normalize.css/normalize.css'
 // 引入样式
 import './styles/index.scss'
 
+// 事件总线
+Vue.prototype.$bus = new Vue()
+
 // 使用ElementUI
 import ElementUI from 'element-ui'
 Vue.use(ElementUI)

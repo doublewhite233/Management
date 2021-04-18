@@ -21,6 +21,13 @@ router.post('/create', issue_controller.create)
   */
 router.post('/data', issue_controller.getData)
 
+// 根据_id获取任务信息
+/*
+  body:
+  _id: [String, required], _id;
+  */
+  router.post('/databyid', issue_controller.getDataByID)
+
 // 移动任务至其他sprint
 /*
   body:
@@ -36,5 +43,12 @@ router.post('/move', issue_controller.move)
   data: 相关数据
   */
 router.post('/update', issue_controller.update)
+
+// 删除任务
+/*
+  body:
+  _id: [required, String], 历史记录_id
+  */
+  router.post('/delete', issue_controller.delete)
 
 export default router

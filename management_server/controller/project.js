@@ -2,6 +2,10 @@
 
 import ProjectModel from '../models/project.js'
 import UserModel from '../models/user.js'
+import SprintModel from '../models/sprint.js'
+import IssueModel from '../models/issue.js'
+import HistoryModel from '../models/history.js'
+import CommentModel from '../models/comment.js'
 
 class project_controller {
   // 获取项目信息
@@ -62,11 +66,26 @@ class project_controller {
   }
   // 删除项目
   async delete(req, res, next) {
-    // todo 删除时需要把所有问题同样删除
     const { _id } = req.body
-    ProjectModel.remove({ _id }, (err, doc) => {
+    ProjectModel.deleteOne({ _id }, (err, doc) => {
       if (doc) {
-        res.send({ code: 0, data: '删除项目成功！' })
+        SprintModel.deleteMany({ project: _id }, (e, d) => {
+          if (d) {
+            IssueModel.deleteMany({ project: _id }, (ee, dd) => {
+              if (dd) {
+                HistoryModel.deleteMany({ project: _id }, (eee, ddd) => {
+                  if (ddd) {
+                    CommentModel.deleteMany({ project: _id }, (errr, dooo) => {
+                      if (dooo) {
+                        res.send({ code: 0, data: '删除项目成功！' })
+                      } else res.send({ code: 1, data: 'error' })
+                    })
+                  } else res.send({ code: 1, data: 'error' })
+                })
+              } else res.send({ code: 1, data: 'error' })
+            })
+          } else res.send({ code: 1, data: 'error' })
+        })
       } else {
         res.send({ code: 1, data: 'error' })
       }

@@ -41,7 +41,7 @@ class issuetype_controller {
   // 删除
   async delete(req, res, next) {
     const { _id } = req.body
-    IssueTypeModel.remove({ _id }, (err, doc) => {
+    IssueTypeModel.deleteOne({ _id }, (err, doc) => {
       if (doc) {
         res.send({ code: 0, data: '删除成功！' })
       } else {

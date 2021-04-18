@@ -1,6 +1,8 @@
 'use strict';
 
 import IssueModel from '../models/issue.js'
+import HistoryModel from '../models/history.js'
+import CommentModel from '../models/comment.js'
 
 class issue_controller {
   // 新建任务
@@ -35,6 +37,18 @@ class issue_controller {
     })
   }
 
+  // 根据_id获取任务信息
+  async getDataByID(req, res, next) {
+    const { _id } = req.body
+    IssueModel.findById(_id).populate('assigner assignee', 'username mail').populate('project', 'name').populate('type', 'name').populate('sprint', 'name').exec((err, doc) => {
+      if (doc) {
+        res.send({ code: 0, data: doc })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
   // 移动任务至其他sprint
   async move(req, res, next) {
     const { _id, sprint } = req.body
@@ -54,6 +68,30 @@ class issue_controller {
       console.log(err)
       if (doc) {
         res.send({ code: 0, data: '修改成功！' })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
+  // 删除
+  async delete(req, res, next) {
+    const { _id } = req.body
+    IssueModel.deleteOne({ _id }, (err, doc) => {
+      if (doc) {
+        CommentModel.deleteMany({ issue: _id }, (error, doo) => {
+          if (doo) {
+            HistoryModel.deleteMany({ issue: _id }, (e, d) => {
+              if (d) {
+                res.send({ code: 0, data: '删除成功！' })
+              } else {
+                res.send({ code: 1, data: 'error' })
+              }
+            })
+          } else {
+            res.send({ code: 1, data: 'error' })
+          }
+        })
       } else {
         res.send({ code: 1, data: 'error' })
       }

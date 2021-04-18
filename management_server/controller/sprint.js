@@ -1,6 +1,7 @@
 'use strict';
 
 import SprintModel from '../models/sprint.js'
+import IssueModel from '../models/issue.js'
 
 class sprint_controller {
   async create(req, res, next) {
@@ -16,10 +17,16 @@ class sprint_controller {
 
   async delete(req, res, next) {
     const { _id } = req.body
-    // todo 删除时将issue sprint 清空
-    SprintModel.remove({ _id }, (err, doc) => {
+    // 删除时将issue sprint 清空
+    SprintModel.deleteOne({ _id }, (err, doc) => {
       if (doc) {
-        res.send({ code: 0, data: '删除冲刺成功！' })
+        IssueModel.updateMany({ sprint: _id }, { sprint: null }, (e, docs) => {
+          if (docs) {
+            res.send({ code: 0, data: '删除冲刺成功！' })
+          } else {
+            res.send({ code: 1, data: 'error' })
+          }
+        })
       } else {
         res.send({ code: 1, data: 'error' })
       }

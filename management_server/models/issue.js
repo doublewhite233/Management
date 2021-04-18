@@ -14,11 +14,10 @@ const issueSchema = new Schema({
   assignee: { type: Schema.Types.ObjectId, ref: 'User' },
   estimate: { type: Number }, // 预计花费时间，统一采用h为单位
   logtime: { type: Number }, // 剩余时间
-  sprint: { type: Schema.Types.ObjectId },
+  sprint: { type: Schema.Types.ObjectId, ref: 'Sprint' },
   state: { type: String, default: 'todo', enum: ['todo', 'inprogress', 'testing', 'verified', 'closed'] },
   create_at: { type: Date, required: true },
-  update_at: { type: Date, required: true },
-  due_at: { type: Date } // 截止日期
+  update_at: { type: Date, required: true }
 })
 
 const Issue = mongoose.model('Issue', issueSchema)

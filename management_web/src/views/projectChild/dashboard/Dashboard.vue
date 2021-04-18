@@ -197,7 +197,7 @@ export default {
             } else {
               this.$message({ message: '似乎出了一点问题...', type: 'error' })
             }
-            await logHistory(issue._id, this.$store.state.user_info._id, this.draggingCol.end, null)
+            await logHistory(this.$store.state.project_info._id, issue._id, this.$store.state.user_info._id, this.draggingCol.end, null)
           }
         }
         await this.getIssueData(this.$store.state.project_info._id)
@@ -212,11 +212,12 @@ export default {
     async handleSubmit() {
       const data = await updateIssue(this.dialogData._id, { state: this.draggingCol.end, estimate: formatLogtoHour(this.dialogData.estimate, 8), logtime: formatLogtoHour(this.dialogData.estimate, 8) })
       if (data && data.code === 0) {
+        await logHistory(this.$store.state.project_info._id, this.dialogData._id, this.$store.state.user_info._id, 'estimate', formatLogtoHour(this.dialogData.estimate, 8))
         this.$message({ message: '更新成功', type: 'success' })
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
       }
-      await logHistory(this.dialogData._id, this.$store.state.user_info._id, this.draggingCol.end, null)
+      await logHistory(this.$store.state.project_info._id, this.dialogData._id, this.$store.state.user_info._id, this.draggingCol.end, null)
       await this.getIssueData(this.$store.state.project_info._id)
       this.dialogVisible = false
     },

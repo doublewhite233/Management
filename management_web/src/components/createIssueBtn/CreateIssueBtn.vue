@@ -3,16 +3,16 @@
     <el-button icon="el-icon-plus" @click="handleClick">创建任务</el-button>
 
     <el-dialog title="创建任务" :visible.sync="dialogVisible" width="60%">
-      <el-form :model="editData" :rules="rules" label-position="left" ref="dialogForm" style="padding: 0 20px">
-        <el-form-item label="任务名称" label-width="80px" prop="name">
+      <el-form :model="editData" :rules="rules" label-position="left" label-width="80px" ref="dialogForm" style="padding: 0 20px">
+        <el-form-item label="任务名称" prop="name">
           <el-input v-model="editData.name" placeholder="请输入名称"/>
         </el-form-item>
-        <el-form-item label="任务类型" label-width="80px" prop="type">
+        <el-form-item label="任务类型" prop="type">
           <el-select v-model="editData.type" placeholder="请选择">
             <el-option v-for="i in issueType" :key="i._id" :value="i._id" :label="i.name" />
           </el-select>
         </el-form-item>
-        <el-form-item label="优先级" label-width="80px">
+        <el-form-item label="优先级">
           <el-radio-group v-model="editData.priority" size="small">
             <el-radio-button :label="1" />
             <el-radio-button :label="2" />
@@ -23,15 +23,15 @@
             <i class="el-icon-question" style="margin-left: 10px;" slot="reference"/>
           </el-popover>
         </el-form-item>
-        <el-form-item label="问题描述" label-width="80px">
+        <el-form-item label="问题描述">
           <editor @change="handleEditorChange" :content="editData.desc" />
         </el-form-item>
-        <el-form-item label="指派给" label-width="80px">
+        <el-form-item label="指派给">
           <el-select v-model="editData.assignee" filterable>
             <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="预计耗时" label-width="80px" prop="estimate">
+        <el-form-item label="预计耗时" prop="estimate">
           <el-input v-model="editData.estimate" style="width: 220px;"/>
           <span style="padding: 0 10px">eg. 3w 4d 6h</span>
           <el-popover placement="top-start" width="300" trigger="hover">
@@ -39,9 +39,6 @@
             <div style="margin-top: 10px;">转换标准： 1w = 5d, 1d = 8h</div>
             <i class="el-icon-question" slot="reference"/>
           </el-popover>
-        </el-form-item>
-        <el-form-item label="截止日期" label-width="80px">
-          <el-date-picker v-model="editData.due_at" type="datetime"/>
         </el-form-item>
       </el-form>
 
@@ -88,7 +85,7 @@ export default {
     return {
       dialogVisible: false,
       loading: false,
-      editData: { name: '', type: '', priority: 3, desc: '', assignee: '', estimate: '', due_at: '' },
+      editData: { name: '', type: '', priority: 3, desc: '', assignee: '', estimate: '' },
       issueType: [],
       personOption: [],
       rules: {
@@ -115,6 +112,7 @@ export default {
 
     handleClick() {
       this.dialogVisible = true
+      this.$bus.$emit('clear-editor')
       Object.keys(this.editData).forEach(k => {
         if (k === 'priority') {
           this.editData[k] = 3
@@ -145,7 +143,10 @@ export default {
           this.$set(submitData, 'sprint', this.sprint === '' ? null : this.sprint)
           const res = await createIssue(submitData)
           if (res && res.code === 0) {
-            await logHistory(res.data._id, this.$store.state.user_info._id, 'create', null)
+            await logHistory(this.$store.state.project_info._id, res.data._id, this.$store.state.user_info._id, 'create', null)
+            if (submitData.estimate) {
+              await logHistory(this.$store.state.project_info._id, res.data._id, this.$store.state.user_info._id, 'estimate', submitData.estimate)
+            }
             this.$emit('success')
             this.$message({ message: '新建任务成功', type: 'success' })
           } else {

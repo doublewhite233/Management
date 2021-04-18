@@ -1,5 +1,5 @@
 <template>
-  <div :class="ishovercss ? 'content active' : 'content'">
+  <div :class="ishovercss ? 'content active' : 'content'" @click="handleClick">
     <el-row>
       <el-col :span="size === 'mini' ? 24 : 18">
         <div class="issue-title">{{ data.name }}</div>
@@ -54,6 +54,11 @@ export default {
         return info
       }
     }
+  },
+  methods: {
+    handleClick() {
+      this.$router.push({ path: '/issue', query: { id: this.data._id }})
+    }
   }
 }
 </script>
@@ -64,6 +69,7 @@ export default {
   border-bottom: 1px solid #E4E7ED;
   background-color: #FFFFFF;
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .active:hover {

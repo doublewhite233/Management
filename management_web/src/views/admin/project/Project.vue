@@ -69,14 +69,14 @@
     </div>
 
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="50%">
-      <el-form :model="projectForm" :rules="rules" label-position="left" ref="projectForm" style="padding: 0 20px">
-        <el-form-item label="项目名称" label-width="80px" prop="name">
+      <el-form :model="projectForm" :rules="rules" label-position="left" label-width="80px" ref="projectForm" style="padding: 0 20px">
+        <el-form-item label="项目名称" prop="name">
           <el-input v-model="projectForm.name" placeholder="请输入项目名称" maxlength="30" show-word-limit />
         </el-form-item>
-        <el-form-item label="项目描述" label-width="80px">
+        <el-form-item label="项目描述">
           <el-input v-model="projectForm.desc" type="textarea" :rows="4" placeholder="请输入项目描述" maxlength="100" show-word-limit />
         </el-form-item>
-        <el-form-item label="项目标签" label-width="80px">
+        <el-form-item label="项目标签">
           <el-tag
             v-for="tag in projectForm.tag"
             :key="tag"
@@ -105,7 +105,7 @@
           </span>
           <el-button v-else size="small" @click="showTagInput" class="tags">添加标签</el-button>
         </el-form-item>
-        <el-form-item label="负责人" label-width="80px" prop="leader">
+        <el-form-item label="负责人" prop="leader">
           <el-select v-model="projectForm.leader" filterable remote :remote-method="getPersonList" :loading="loading" @blur="$refs.projectForm.validateField('leader')">
             <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>

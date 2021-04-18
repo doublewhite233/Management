@@ -62,19 +62,19 @@ export const constantRoutes = [
         component: () => import('@/views/projectChild/detail/Detail.vue')
       }]
     }]
+  },
+  {
+    path: '/',
+    component: Layout,
+    hidden: true,
+    redirect: '/issue',
+    children: [{
+      path: 'issue',
+      name: '任务详情',
+      component: () => import('@/views/issue/Issue.vue'),
+      meta: { path: '/project' }
+    }]
   }
-  // {
-  //   path: '/project',
-  //   component: Layout,
-  //   redirect: '/project/about',
-  //   name: '项目',
-  //   children: [{
-  //     path: 'about',
-  //     name: '项目',
-  //     component: () => import('@/views/general/project/Project.vue'),
-  //     meta: { path: '/project/about' }
-  //   }]
-  // }
 ]
 
 export const adminRoutes = [
