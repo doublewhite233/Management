@@ -1,10 +1,10 @@
 <template>
-  <div style="padding: 20px">
+  <el-main>
     <el-row>
       <el-col :span="6">aaa</el-col>
       <el-col :span="6">bbb</el-col>
     </el-row>
-  </div>
+  </el-main>
 </template>
 
 <script>

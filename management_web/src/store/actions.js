@@ -2,7 +2,7 @@ import { request } from '@/network/request.js'
 import { encryptAES } from '@/utils/secret.js'
 import { removeCookie } from '@/utils/cookies.js'
 import { constantRoutes, adminRoutes } from '@/router'
-import { SET_USER_STATE, CLEAR_USER_STATE, SET_ROUTES, SET_PROJECT_INFO, CLEAR_PROJECT_INFO, SET_LOADING_STATE } from './mutation-types.js'
+import { SET_USER_STATE, CLEAR_USER_STATE, SET_ROUTES } from './mutation-types.js'
 
 export default {
   // 用户登录
@@ -47,45 +47,6 @@ export default {
   logout(context, payload) {
     removeCookie('userid')
     context.commit(CLEAR_USER_STATE)
-  },
-
-  // 获取项目信息
-  getProjectInfo(context, payload) {
-    return new Promise((resolve, reject) => {
-      context.commit(CLEAR_PROJECT_INFO)
-      request({
-        url: '/project/data'
-      }).then(res => {
-        if (res.code === 0 && res.totalCount > 0) {
-          // 设置加载状态为true
-          context.commit(SET_LOADING_STATE, true)
-          context.commit(SET_PROJECT_INFO, res.data[0])
-        }
-        resolve(res)
-      }).catch(err => {
-        reject(err)
-      })
-    })
-  },
-
-  // 设置项目信息
-  setProjectInfo(context, payload) {
-    const { id } = payload
-    return new Promise((resolve, reject) => {
-      request({
-        url: '/project/databyid',
-        method: 'post',
-        data: { id }
-      }).then(res => {
-        if (res.code === 0) {
-          context.commit(SET_LOADING_STATE, true)
-          context.commit(SET_PROJECT_INFO, res.data)
-          resolve(res.data)
-        }
-      }).catch(err => {
-        reject(err)
-      })
-    })
   },
 
   // 根据权限生成路由

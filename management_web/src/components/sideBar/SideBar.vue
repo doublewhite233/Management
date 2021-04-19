@@ -35,12 +35,16 @@ export default {
           { name: '导航二', icon: 'el-icon-menu' }
         ]
       }
+    },
+    query: {
+      type: String,
+      default: ''
     }
   },
   methods: {
     handleSelect(path) {
       if (this.$route.path !== path) {
-        this.$router.push(path)
+        this.$router.push({ path: path, query: { id: this.query }})
       }
     }
   }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 无项目显示Empty -->
-    <div v-if="$store.state.project_info._id === ''" style="height: calc(100vh - 111px);">
+    <div v-if="!this.$route.query.id" style="height: calc(100vh - 111px);">
       <empty>
         <template v-slot:text>暂无项目，请等待管理员创建</template>
       </empty>
@@ -9,11 +9,11 @@
 
     <el-row v-else>
       <el-col :span="4" style="height: calc(100vh - 112px); margin-top: 2px">
-        <side-bar :menuData="sideBarData">
+        <side-bar :menuData="sideBarData" :query="projectInfo._id">
           <template v-slot:header>
             <el-row class="title-warp">
               <el-col class="title-content" v-if="!showSelect" @click.native="handleShowSelect">
-                <h4>{{ $store.state.project_info.name }}<i class="el-icon-setting" /></h4>
+                <h4>{{ projectInfo.name || '' }}<i class="el-icon-setting" /></h4>
               </el-col>
               <el-col v-else class="title-content">
                 <el-select v-model="selectedProject" filterable remote :remote-method="getProjectList" :loading="loading" @keyup.enter.native="handleConfirmSelect">
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { getProjectList } from '@/network/project.js'
+import { getProjectList, getProjectDetail, getProjectData } from '@/network/project.js'
 
 import SideBar from '@/components/sideBar/SideBar'
 import Empty from '@/components/empty/Empty'
@@ -57,19 +57,35 @@ export default {
       loading: false,
       showSelect: false,
       selectedProject: '',
-      selectOption: []
+      selectOption: [],
+      projectInfo: {}
     }
   },
-  mounted() {
-    // 清除信息，并重新加载
-    this.$store.dispatch('getProjectInfo')
+  async mounted() {
+    if (this.$route.query.id) {
+      // 获取详情
+      const data = await getProjectDetail(this.$route.query.id)
+      if (data && data.code === 0) {
+        this.projectInfo = data.data
+      } else this.$router.replace('/404')
+    } else {
+      const res = await getProjectData()
+      if (res.code === 0 && res.totalCount > 0) {
+        const path = this.$route.path
+        this.$router.replace({ path: path, query: { id: res.data[0]._id }})
+        const data = await getProjectDetail(this.$route.query.id)
+        if (data && data.code === 0) {
+          this.projectInfo = data.data
+        } else this.$router.replace('/404')
+      }
+    }
   },
   methods: {
     handleShowSelect() {
       this.showSelect = true
       this.selectOption = []
-      this.selectOption.push({ _id: this.$store.state.project_info._id, name: this.$store.state.project_info.name })
-      this.selectedProject = this.$store.state.project_info._id
+      this.selectOption.push({ _id: this.projectInfo._id, name: this.projectInfo.name })
+      this.selectedProject = this.projectInfo._id
     },
     async getProjectList(query) {
       this.loading = true
@@ -83,8 +99,14 @@ export default {
       this.loading = false
     },
     async handleConfirmSelect() {
-      if (this.selectedProject !== this.$store.state.project_info._id) {
-        await this.$store.dispatch('setProjectInfo', { id: this.selectedProject })
+      if (this.selectedProject !== this.projectInfo._id) {
+        const path = this.$route.path
+        this.$router.replace({ path: path, query: { id: this.selectedProject }})
+        this.$bus.$emit('change-project')
+        const data = await getProjectDetail(this.selectedProject)
+        if (data && data.code === 0) {
+          this.projectInfo = data.data
+        } else this.$router.replace('/404')
       }
       this.showSelect = false
     }

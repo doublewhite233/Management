@@ -1,5 +1,5 @@
 <template>
-  <el-main v-loading="$store.state.loading" class="main">
+  <el-main class="main">
     <el-card v-if="Object.keys(projectData).length > 0">
       <div slot="header" class="clearfix"><span>项目信息</span></div>
       <h3 class="item">{{ projectData.name }}</h3>
@@ -79,7 +79,6 @@
 import { getProjectDetail, addTeamMember, deleteTeamMember } from '@/network/project.js'
 import { getUserData } from '@/network/user.js'
 import { formatDate } from '@/utils/index.js'
-import { SET_LOADING_STATE } from '@/store/mutation-types.js'
 
 export default {
   data() {
@@ -94,29 +93,22 @@ export default {
     }
   },
   computed: {
-    loading() {
-      return this.$store.state.loading
-    },
     getDate() {
       return (date) => formatDate(date, 'yyyy-MM-dd hh:mm')
     }
   },
-  watch: {
-    async loading(val, oldVal) {
-      if (val) {
-        await this.fetchData(this.$store.state.project_info._id)
-      }
+  async mounted() {
+    this.$bus.$on('change-project', async() => await this.fetchData(this.$route.query.id))
+    if (this.$route.query.id) {
+      await this.fetchData(this.$route.query.id)
     }
   },
-  async mounted() {
-    if (this.$store.state.project_info._id !== '') {
-      await this.fetchData(this.$store.state.project_info._id)
-    }
+  destroyed() {
+    this.$bus.$off('change-project')
   },
   methods: {
     async fetchData(id) {
       const { data } = await getProjectDetail(id)
-      this.$store.commit(SET_LOADING_STATE, false)
       this.projectData = data
     },
     showMoreTeam() {
@@ -125,10 +117,10 @@ export default {
     },
     async handleDeleteTeam(scope) {
       await this.$confirm('您确定要删除这个成员吗？').then(async() => {
-        const data = await deleteTeamMember(this.$store.state.project_info._id, scope.row._id)
+        const data = await deleteTeamMember(this.$route.query.id, scope.row._id)
         if (data && data.code === 0) {
           this.$message({ message: '删除项目成员成功！', type: 'success' })
-          await this.fetchData(this.$store.state.project_info._id)
+          await this.fetchData(this.$route.query.id)
         } else {
           this.$message({ message: '删除失败，似乎出了一点问题...', type: 'error' })
         }
@@ -140,10 +132,10 @@ export default {
       if (this.projectData.team.some(user => user._id === this.addUser)) {
         this.$message({ message: '该用户已是项目成员！', type: 'warning' })
       } else {
-        const data = await addTeamMember(this.$store.state.project_info._id, this.addUser)
+        const data = await addTeamMember(this.$route.query.id, this.addUser)
         if (data && data.code === 0) {
           this.$message({ message: '添加项目成员成功！', type: 'success' })
-          await this.fetchData(this.$store.state.project_info._id)
+          await this.fetchData(this.$route.query.id)
         } else {
           this.$message({ message: '添加失败，似乎出了一点问题...', type: 'error' })
         }

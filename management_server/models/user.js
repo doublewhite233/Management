@@ -9,6 +9,7 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   username: { type: String },
   role: { type: String, default: 'user', enum: ['admin', 'user'] }, // 用户身份
+  department: { type: Schema.Types.ObjectId, ref: 'Department' },
   // todo
   extra: { type: Map, of: String }
 })

@@ -1,5 +1,5 @@
 <template>
-  <el-main v-loading="$store.state.loading" class="main">
+  <el-main class="main">
     <el-row style="margin-bottom: 20px;">
       <el-col :span="10">
         <el-select placeholder="输入人员进行查找" v-model="searchList" filterable multiple reserve-keyword clearable style="width: 100%">
@@ -38,7 +38,7 @@
             </v-contextmenu-item>
           </v-contextmenu>
 
-        <createIssueBtn @success="fetchData($store.state.project_info._id)" :sprint="i._id" />
+        <createIssueBtn @success="fetchData($route.query.id)" :sprint="i._id" :project="$route.query.id" />
       </el-collapse-item>
 
       <el-collapse-item name="backlog">
@@ -59,7 +59,7 @@
             </v-contextmenu-item>
           </v-contextmenu>
         </div>
-        <createIssueBtn @success="fetchData($store.state.project_info._id)" />
+        <createIssueBtn @success="fetchData($route.query.id)" :project="$route.query.id" />
       </el-collapse-item>
     </el-collapse>
 
@@ -105,7 +105,6 @@ import { getSprintData, createSprint, deleteSprint, updateSprint } from '@/netwo
 import { getTeamInfo } from '@/network/project.js'
 import { getIssueData, moveIssueSprint } from '@/network/issue.js'
 import { logHistory } from '@/network/history.js'
-import { SET_LOADING_STATE } from '@/store/mutation-types.js'
 import { formatDate, debounce } from '@/utils/index.js'
 
 import issueItem from '@/components/issueItem/IssueItem.vue'
@@ -144,19 +143,11 @@ export default {
     }
   },
   computed: {
-    loading() {
-      return this.$store.state.loading
-    },
     getDate() {
       return (date) => formatDate(date, 'yy/MM/dd hh:mm')
     }
   },
   watch: {
-    async loading(val, oldVal) {
-      if (val) {
-        await this.fetchData(this.$store.state.project_info._id)
-      }
-    },
     'editData.start_at': {
       handler: function(val) {
         if (val !== '' && val !== null && val !== undefined) {
@@ -193,10 +184,11 @@ export default {
     }
   },
   async mounted() {
-    if (this.$store.state.project_info._id !== '') {
-      await this.fetchData(this.$store.state.project_info._id)
+    this.$bus.$on('change-project', async() => await this.fetchData(this.$route.query.id))
+    if (this.$route.query.id) {
+      await this.fetchData(this.$route.query.id)
       // 获取成员列表
-      const teamData = await getTeamInfo(this.$store.state.project_info._id)
+      const teamData = await getTeamInfo(this.$route.query.id)
       if (teamData && teamData.data && teamData.data.team) {
         teamData.data.team.forEach(i => {
           this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
@@ -213,11 +205,13 @@ export default {
       })
     }
   },
+  destroyed() {
+    this.$bus.$off('change-project')
+  },
   methods: {
     async fetchData(project) {
       // 获取sprint信息
       const { data } = await getSprintData(0, ['new', 'running'], project)
-      this.$store.commit(SET_LOADING_STATE, false)
       this.sprintList = data
       const sprintids = [null]
       this.sprintList.forEach(i => sprintids.push(i._id))
@@ -233,13 +227,13 @@ export default {
     },
     async handleCreateSprint() {
       await this.$confirm('您确定要新建一个冲刺吗？').then(async() => {
-        const res = await createSprint('New Sprint', this.$store.state.project_info._id)
+        const res = await createSprint('New Sprint', this.$route.query.id)
         if (res && res.code === 0) {
           this.$message({ message: res.data, type: 'success' })
         } else {
           this.$message({ message: '新建冲刺失败！', type: 'error' })
         }
-        await this.fetchData(this.$store.state.project_info._id)
+        await this.fetchData(this.$route.query.id)
       }).catch(() => {
         this.$message.info('已取消')
       })
@@ -252,7 +246,7 @@ export default {
         } else {
           this.$message({ message: '删除冲刺失败！', type: 'error' })
         }
-        await this.fetchData(this.$store.state.project_info._id)
+        await this.fetchData(this.$route.query.id)
       }).catch(() => {
         this.$message.info('已取消删除')
       })
@@ -313,7 +307,7 @@ export default {
             this.$message({ message: '现在已经有一个冲刺在进行中，请结束后再开始其他冲刺！', type: 'warning' })
           }
           this.dialogVisible = false
-          await this.fetchData(this.$store.state.project_info._id)
+          await this.fetchData(this.$route.query.id)
         }
       })
     },
@@ -322,15 +316,15 @@ export default {
       const data = await moveIssueSprint(this.rightClickIssue, sprint)
       if (data && data.code === 0) {
         this.$message({ message: '移动成功！', type: 'success' })
-        await logHistory(this.$store.state.project_info._id, this.rightClickIssue, this.$store.state.user_info._id, 'update', null)
-        await this.fetchData(this.$store.state.project_info._id)
+        await logHistory(this.$route.query.id, this.rightClickIssue, this.$store.state.user_info._id, 'update', null)
+        await this.fetchData(this.$route.query.id)
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
       }
     },
 
     debounceInput: debounce(async(that) => {
-      await that.fetchData(that.$store.state.project_info._id)
+      await that.fetchData(that.$route.query.id)
     }, 500)
   }
 }

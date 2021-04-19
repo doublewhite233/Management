@@ -1,22 +1,19 @@
 <template>
-  <el-main v-loading="$store.state.loading" class="main">
+  <el-main class="main">
     context
   </el-main>
 </template>
 
 <script>
 export default {
-  computed: {
-    loading() {
-      return this.$store.state.loading
+  async mounted() {
+    this.$bus.$on('change-project', async() => await this.fetchData(this.$route.query.id))
+    if (this.$route.query.id) {
+      // await this.fetchData(this.$route.query.id)
     }
   },
-  watch: {
-    async loading(val, oldVal) {
-      if (val) {
-        console.log('done')
-      }
-    }
+  destroyed() {
+    this.$bus.$off('change-project')
   }
 }
 </script>

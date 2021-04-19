@@ -1,5 +1,5 @@
 <template>
-  <el-main v-loading="$store.state.loading || mainLoading" class="main">
+  <el-main v-loading="mainLoading" class="main">
     <div v-if="sprintData._id === ''" style="height: 100%;">
       <empty>
         <template v-slot:text>现在没有冲刺在进行中，无法使用看板功能哦</template>
@@ -11,7 +11,7 @@
       <div class="remain-box">
         <i class="el-icon-s-flag" style="margin-right: 10px;"/>
         <span style="font-size: 14px;">{{ getDateSub(new Date(sprintData.end_at)) }}</span>
-        <createIssueBtn :sprint="sprintData._id" @success="fetchData($store.state.project_info._id)" style="display: inline-block; margin-left: 20px;"/>
+        <createIssueBtn :sprint="sprintData._id" @success="fetchData($route.query.id)" :project="$route.query.id" style="display: inline-block; margin-left: 20px;"/>
       </div>
 
       <el-row style="margin-top: 20px;">
@@ -66,7 +66,6 @@ import { getSprintData } from '@/network/sprint.js'
 import { getIssueData, updateIssue } from '@/network/issue.js'
 import { getTeamInfo } from '@/network/project.js'
 import { logHistory } from '@/network/history.js'
-import { SET_LOADING_STATE } from '@/store/mutation-types.js'
 import { getDateSub, debounce, formatLogtoHour } from '@/utils/index.js'
 
 import draggable from 'vuedraggable'
@@ -122,9 +121,6 @@ export default {
     }
   },
   computed: {
-    loading() {
-      return this.$store.state.loading
-    },
     getDateSub() {
       return (date) => {
         const time = getDateSub(new Date(), date)
@@ -135,11 +131,6 @@ export default {
     }
   },
   watch: {
-    async loading(val, oldVal) {
-      if (val) {
-        await this.fetchData(this.$store.state.project_info._id)
-      }
-    },
     searchList: {
       handler() {
         this.debounceInput(this)
@@ -148,16 +139,20 @@ export default {
     }
   },
   async mounted() {
-    if (this.$store.state.project_info._id !== '') {
-      await this.fetchData(this.$store.state.project_info._id)
+    this.$bus.$on('change-project', async() => await this.fetchData(this.$route.query.id))
+    if (this.$route.query.id) {
+      await this.fetchData(this.$route.query.id)
       // 获取成员列表
-      const teamData = await getTeamInfo(this.$store.state.project_info._id)
+      const teamData = await getTeamInfo(this.$route.query.id)
       if (teamData && teamData.data && teamData.data.team) {
         teamData.data.team.forEach(i => {
           this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
         })
       }
     }
+  },
+  destroyed() {
+    this.$bus.$off('change-project')
   },
   methods: {
     onDragStart(i) {
@@ -197,35 +192,34 @@ export default {
             } else {
               this.$message({ message: '似乎出了一点问题...', type: 'error' })
             }
-            await logHistory(this.$store.state.project_info._id, issue._id, this.$store.state.user_info._id, this.draggingCol.end, null)
+            await logHistory(this.$route.query.id, issue._id, this.$store.state.user_info._id, this.draggingCol.end, null)
           }
         }
-        await this.getIssueData(this.$store.state.project_info._id)
+        await this.getIssueData(this.$route.query.id)
       }
     },
     onDrop(col) {
       this.draggingCol.end = col
     },
     debounceInput: debounce(async(that) => {
-      await that.fetchData(that.$store.state.project_info._id)
+      await that.fetchData(that.$route.query.id)
     }, 500),
     async handleSubmit() {
       const data = await updateIssue(this.dialogData._id, { state: this.draggingCol.end, estimate: formatLogtoHour(this.dialogData.estimate, 8), logtime: formatLogtoHour(this.dialogData.estimate, 8) })
       if (data && data.code === 0) {
-        await logHistory(this.$store.state.project_info._id, this.dialogData._id, this.$store.state.user_info._id, 'estimate', formatLogtoHour(this.dialogData.estimate, 8))
+        await logHistory(this.$route.query.id, this.dialogData._id, this.$store.state.user_info._id, 'estimate', formatLogtoHour(this.dialogData.estimate, 8))
         this.$message({ message: '更新成功', type: 'success' })
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
       }
-      await logHistory(this.$store.state.project_info._id, this.dialogData._id, this.$store.state.user_info._id, this.draggingCol.end, null)
-      await this.getIssueData(this.$store.state.project_info._id)
+      await logHistory(this.$route.query.id, this.dialogData._id, this.$store.state.user_info._id, this.draggingCol.end, null)
+      await this.getIssueData(this.$route.query.id)
       this.dialogVisible = false
     },
 
     async fetchData(project) {
       this.mainLoading = true
       const { data } = await getSprintData(0, ['running'], project)
-      this.$store.commit(SET_LOADING_STATE, false)
       if (data.length > 0) {
         this.sprintData = data[0]
         await this.getIssueData(project)

@@ -67,6 +67,10 @@ export default {
     sprint: {
       type: String,
       default: ''
+    },
+    project: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -102,7 +106,7 @@ export default {
     async fetchData() {
       const types = await getIssueType()
       this.issueType = types.data
-      const teamData = await getTeamInfo(this.$store.state.project_info._id)
+      const teamData = await getTeamInfo(this.project)
       if (teamData && teamData.data && teamData.data.team) {
         teamData.data.team.forEach(i => {
           this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
@@ -139,13 +143,13 @@ export default {
             submitData.logtime = submitData.estimate
           }
           this.$set(submitData, 'assigner', this.$store.state.user_info._id)
-          this.$set(submitData, 'project', this.$store.state.project_info._id)
+          this.$set(submitData, 'project', this.project)
           this.$set(submitData, 'sprint', this.sprint === '' ? null : this.sprint)
           const res = await createIssue(submitData)
           if (res && res.code === 0) {
-            await logHistory(this.$store.state.project_info._id, res.data._id, this.$store.state.user_info._id, 'create', null)
+            await logHistory(this.project, res.data._id, this.$store.state.user_info._id, 'create', null)
             if (submitData.estimate) {
-              await logHistory(this.$store.state.project_info._id, res.data._id, this.$store.state.user_info._id, 'estimate', submitData.estimate)
+              await logHistory(this.project, res.data._id, this.$store.state.user_info._id, 'estimate', submitData.estimate)
             }
             this.$emit('success')
             this.$message({ message: '新建任务成功', type: 'success' })

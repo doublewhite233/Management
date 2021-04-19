@@ -66,6 +66,17 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
+    redirect: '/group',
+    children: [{
+      path: 'group',
+      name: '组织',
+      component: () => import('@/views/group/Group.vue'),
+      meta: { path: '/group' }
+    }]
+  },
+  {
+    path: '/',
+    component: Layout,
     hidden: true,
     redirect: '/issue',
     children: [{
@@ -88,6 +99,12 @@ export const adminRoutes = [
       name: '项目管理',
       component: () => import('@/views/admin/project/Project.vue'),
       meta: { path: '/admin/project' }
+    },
+    {
+      path: 'group',
+      name: '部门架构管理',
+      component: () => import('@/views/admin/group/Group.vue'),
+      meta: { path: '/admin/group' }
     },
     {
       path: 'user',
