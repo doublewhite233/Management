@@ -29,7 +29,7 @@ class project_controller {
     if (search.col !== 'leader') {
       const total = await ProjectModel.find(search.col !== '' && search.query !== '' ? { [search.col]: { $regex: search.text }} : null).countDocuments()
       const query = ProjectModel.find(search.col !== '' && search.query !== '' ? { [search.col]: { $regex: search.text }} : null).populate('leader', 'username mail').skip(skip).sort(sort)
-      query.limit(10).exec(async (err, data) => {
+      query.limit(10).exec(async(err, data) => {
         if (data) {
           res.send({ code: 0, data, total, totalCount })
         } else {
@@ -47,7 +47,6 @@ class project_controller {
         if (data) {
           res.send({ code: 0, data, totalCount, total })
         } else {
-          console.log(err)
           res.send({ code: 1, data: 'error' })
         }
       })
@@ -178,6 +177,20 @@ class project_controller {
     ProjectModel.findByIdAndUpdate({ _id }, { $pull: { team: user_id }}, (err, doc) => {
       if (doc) {
         res.send({ code: 0, data: '删除成员成功！' })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
+  // 首页获取用户参与项目
+  async mywork(req, res, next) {
+    const { _id } = req.body
+    const total = await ProjectModel.find({ team: { $elemMatch: { $eq: _id }} }).countDocuments()
+    const query = ProjectModel.find({ team: { $elemMatch: { $eq: _id }} }).populate('leader', 'username').sort({ update_at: -1 })
+    query.exec((err, doc) => {
+      if (doc) {
+        res.send({ code: 0, data: doc, total })
       } else {
         res.send({ code: 1, data: 'error' })
       }

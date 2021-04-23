@@ -47,8 +47,15 @@ router.post('/update', issue_controller.update)
 // 删除任务
 /*
   body:
-  _id: [required, String], 历史记录_id
+  _id: [required, String], 问题_id
   */
-  router.post('/delete', issue_controller.delete)
+router.post('/delete', issue_controller.delete)
+
+// 首页获取用户任务进行情况
+/*
+  body:
+  _id: [required, String], 用户_id
+  */
+router.post('/mywork', issue_controller.mywork)
 
 export default router

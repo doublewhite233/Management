@@ -18,7 +18,7 @@
     <el-row>
       <el-col :span="12">
         <el-card class="cards" style="margin-right: 10px">
-          <div slot="header" class="clearfix">
+          <div slot="header">
             <span>团队信息</span>
             <el-button style="float: right; padding: 3px 0" type="text" @click="showMoreTeam">显示更多</el-button>
           </div>
@@ -35,10 +35,7 @@
 
       <el-col :span="12">
         <el-card class="cards" style="margin-left: 10px">
-          <div slot="header" class="clearfix">
-            <span>任务概况</span>
-            <el-button style="float: right; padding: 3px 0" type="text">显示更多</el-button>
-          </div>
+          <div slot="header"><span>任务概况</span></div>
         </el-card>
       </el-col>
     </el-row>
@@ -108,8 +105,12 @@ export default {
   },
   methods: {
     async fetchData(id) {
-      const { data } = await getProjectDetail(id)
-      this.projectData = data
+      const data = await getProjectDetail(id)
+      if (data && data.code === 0) {
+        this.projectData = data.data
+      } else {
+        this.$message({ message: '似乎出了一点问题...', type: 'error' })
+      }
     },
     showMoreTeam() {
       this.dialogTitle = '团队信息'

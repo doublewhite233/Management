@@ -84,4 +84,11 @@ router.post('/addteam', project_controller.addTeam)
   */
 router.post('/deleteteam', project_controller.deleteTeam)
 
+// 首页获取用户参与项目
+/*
+  body:
+  _id: [required, String], 用户_id
+  */
+router.post('/mywork', project_controller.mywork)
+
 export default router

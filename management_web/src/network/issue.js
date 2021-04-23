@@ -47,3 +47,11 @@ export function deleteIssue(_id) {
     data: { _id }
   })
 }
+
+export function getMyData(_id) {
+  return request({
+    url: '/issue/mywork',
+    method: 'post',
+    data: { _id }
+  })
+}

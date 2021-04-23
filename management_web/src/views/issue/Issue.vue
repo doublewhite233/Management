@@ -441,7 +441,7 @@ export default {
       this.$refs.dialogForm.validate(async(valid) => {
         if (valid) {
           const time = formatLogtoHour(this.dialogData.input, 8)
-          if (!isNaN(time)) {
+          if (isNaN(time)) {
             this.$message({ message: '时间格式转换失败！', type: 'warning' })
             this.dialogVisible = false
             return

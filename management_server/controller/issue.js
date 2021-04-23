@@ -97,6 +97,20 @@ class issue_controller {
       }
     })
   }
+
+  // 首页获取用户任务进行情况
+  async mywork(req, res, next) {
+    const { _id } = req.body
+    const assigner = await IssueModel.find({ assigner: _id, state: { $in: ['todo', 'inprogress', 'testing', 'verified']} }).countDocuments()
+    const unfinished = await IssueModel.find({ assignee: _id, state: { $in: ['todo', 'inprogress', 'testing', 'verified']} }).countDocuments()
+    const todo = await IssueModel.find({ assignee: _id, state: 'todo' }).countDocuments()
+    const inprogress = await IssueModel.find({ assignee: _id, state: 'inprogress' }).countDocuments()
+    const testing = await IssueModel.find({ assignee: _id, state: 'testing' }).countDocuments()
+    const verified = await IssueModel.find({ assignee: _id, state: 'verified' }).countDocuments()
+    if (!isNaN(assigner) && !isNaN(unfinished) && !isNaN(todo) && !isNaN(inprogress) && !isNaN(testing) && !isNaN(verified)) {
+      res.send({ code: 0, data: { assigner, unfinished, todo, inprogress, testing, verified } })
+    } else res.send({ code: 1, data: 'error' })
+  }
 }
 
 export default new issue_controller()

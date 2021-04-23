@@ -29,11 +29,7 @@
       <el-table :data="projectData" :default-sort="sort" @sort-change="handleSort">
         <el-table-column prop="name" label="项目名称" align="center" sortable="custom">
           <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top">
-              <p style="padding: 5px 10px">项目名称：{{ scope.row.name }}</p>
-              <p style="padding: 5px 10px">项目描述：{{ scope.row.desc }}</p>
-              <div slot="reference">{{ scope.row.name }}</div>
-            </el-popover>
+            <el-link @click="clickProject(scope.row._id)" :underline="false">{{ `${scope.row.name}` }}</el-link>
           </template>
         </el-table-column>
         <el-table-column prop="leader" label="负责人" align="center" sortable="custom">
@@ -106,7 +102,7 @@
           <el-button v-else size="small" @click="showTagInput" class="tags">添加标签</el-button>
         </el-form-item>
         <el-form-item label="负责人" prop="leader">
-          <el-select v-model="projectForm.leader" filterable remote :remote-method="getPersonList" :loading="loading" @blur="$refs.projectForm.validateField('leader')">
+          <el-select v-model="projectForm.leader" filterable remote :remote-method="getPersonList" :loading="loading" style="width: 100%;" @blur="$refs.projectForm.validateField('leader')">
             <el-option v-for="item in personOption" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -219,7 +215,7 @@ export default {
     handleUpdate(data) {
       const tempArr = Object.keys(data)
       Object.keys(this.projectForm).forEach(k => {
-        if (tempArr.indexOf(k) !== '-1' && k !== 'leader' && k !== 'leaderid') {
+        if (tempArr.indexOf(k) !== -1 && k !== 'leader' && k !== 'leaderid') {
           this.projectForm[k] = data[k]
         }
         if (k === 'leader') this.projectForm[k] = `${data[k].username}(${data[k].mail})`
@@ -370,6 +366,9 @@ export default {
       }).catch(() => {
         this.$message.info('已取消删除')
       })
+    },
+    clickProject(id) {
+      this.$router.push({ path: '/project/detail', query: { id }})
     }
   }
 }

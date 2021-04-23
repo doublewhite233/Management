@@ -75,3 +75,11 @@ export function deleteTeamMember(project, user) {
     data: { _id: project, user_id: user }
   })
 }
+
+export function getMyProject(_id) {
+  return request({
+    url: '/project/mywork',
+    method: 'post',
+    data: { _id }
+  })
+}

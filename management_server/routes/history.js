@@ -30,4 +30,7 @@ router.post('/historyinfo', history_controller.getData)
   */
 router.post('/delete', history_controller.delete)
 
+// 首页获取最新的五条历史记录(无log状态)
+router.get('/mywork', history_controller.mywork)
+
 export default router

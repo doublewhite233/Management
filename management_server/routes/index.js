@@ -7,6 +7,7 @@ import issue from './issue.js'
 import issueType from './issueType.js'
 import history from './history.js'
 import comment from './comment.js'
+import department from './department.js'
 
 export default app => {
   app.use('/user', user)
@@ -16,4 +17,5 @@ export default app => {
   app.use('/issuetype', issueType)
   app.use('/history', history)
   app.use('/comment', comment)
+  app.use('/department', department)
 }

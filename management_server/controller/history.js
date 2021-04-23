@@ -40,6 +40,18 @@ class history_controller {
       }
     })
   }
+
+  // 首页获取最新的五条历史记录
+  async mywork(req, res, next) {
+    const query = HistoryModel.find({ type: { $in: ['create', 'todo', 'inprogress', 'testing', 'verified', 'closed', 'update', 'estimate']} }).populate('issue', 'name').populate('user', 'username')
+    query.sort({ create_at: -1 }).limit(5).exec((err, data) => {
+      if (data) {
+        res.send({ code: 0, data })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
 }
 
 export default new history_controller()

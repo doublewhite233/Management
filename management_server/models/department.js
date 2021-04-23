@@ -6,9 +6,7 @@ const Schema = mongoose.Schema
 
 const departmentSchema = new Schema({
   name: { type: String, required: true },
-  desc: { type: String },
-  parent: { type: Schema.Types.ObjectId, ref: 'Department', default: null },
-  children: [{ type: Schema.Types.ObjectId, ref: 'Department' }],
+  parent: [{ type: Schema.Types.ObjectId, ref: 'Department' }],
   leader: { type: Schema.Types.ObjectId, ref: 'User' }
 })
 

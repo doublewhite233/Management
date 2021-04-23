@@ -16,6 +16,7 @@
     "normalize.css": "^8.0.1",
     "v-contextmenu": "^2.9.0",
     "vue": "^2.6.11",
+    "vue-animate-number": "^0.4.2",
     "vue-canvas-nest": "^2.0.0",
     "vue-router": "^3.2.0",
     "vue-runtime-helpers": "^1.1.2",

@@ -23,3 +23,9 @@ export function deleteHistory(_id) {
     data: { _id }
   })
 }
+
+export function getMyHistory() {
+  return request({
+    url: '/history/mywork'
+  })
+}

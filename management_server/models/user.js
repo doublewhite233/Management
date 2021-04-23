@@ -11,7 +11,9 @@ const userSchema = new Schema({
   role: { type: String, default: 'user', enum: ['admin', 'user'] }, // 用户身份
   department: { type: Schema.Types.ObjectId, ref: 'Department' },
   // todo
-  extra: { type: Map, of: String }
+  extra: { type: Map, of: String },
+  create_at: { type: Date, required: true },
+  update_at: { type: Date, required: true }
 })
 
 const User = mongoose.model('User', userSchema)
