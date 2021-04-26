@@ -1,8 +1,12 @@
 'use strict';
+import mongoose from 'mongoose'
 
 import IssueModel from '../models/issue.js'
 import HistoryModel from '../models/history.js'
 import CommentModel from '../models/comment.js'
+
+import IssueTypeModel from '../models/issueType.js'
+import SprintModel from '../models/sprint.js'
 
 class issue_controller {
   // 新建任务
@@ -110,6 +114,118 @@ class issue_controller {
     if (!isNaN(assigner) && !isNaN(unfinished) && !isNaN(todo) && !isNaN(inprogress) && !isNaN(testing) && !isNaN(verified)) {
       res.send({ code: 0, data: { assigner, unfinished, todo, inprogress, testing, verified } })
     } else res.send({ code: 1, data: 'error' })
+  }
+
+  // 详情页获取项目任务情况
+  async detail(req, res, next) {
+    const { _id } = req.body
+    const todo = await IssueModel.find({ project: _id, state: 'todo' }).countDocuments()
+    const inprogress = await IssueModel.find({ project: _id, state: 'inprogress' }).countDocuments()
+    const testing = await IssueModel.find({ project: _id, state: 'testing' }).countDocuments()
+    const verified = await IssueModel.find({ project: _id, state: 'verified' }).countDocuments()
+    const closed = await IssueModel.find({ project: _id, state: 'closed' }).countDocuments()
+    if (!isNaN(todo) && !isNaN(inprogress) && !isNaN(testing) && !isNaN(verified) && !isNaN(closed)) {
+      res.send({ code: 0, data: { todo, inprogress, testing, verified, closed } })
+    } else res.send({ code: 1, data: 'error' })
+  }
+
+  // 任务概况图(任务类型)
+  async detailByType(req, res, next) {
+    const { _id } = req.body
+    IssueModel.aggregate([
+      { $match: { project: mongoose.Types.ObjectId(_id) }},
+      { $group: { _id: '$type', count: { $sum: 1 } }},
+      { $lookup: { from: 'issuetypes', localField: '_id', foreignField: '_id', as: 'issuetype' } }
+    ]).exec((err, doc) => {
+      if (doc) {
+        if (doc.length > 0) {
+          res.send({ code: 0, data: doc })
+        } else {
+          IssueTypeModel.find().exec((e, d) => {
+            if (d) {
+              res.send({ code: 0, data: d })
+            } else res.send({ code: 1, data: 'error' })
+          })
+        }
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
+  // 燃尽图
+  async burnDown(req, res, next) {
+    const { _id } = req.body
+    SprintModel.findById(_id).exec((err, sprint) => {
+      if (sprint) {
+        IssueModel.aggregate([
+          { $match: { sprint: mongoose.Types.ObjectId(_id) }},
+          { $group: { _id: '$sprint', count: { $sum: '$estimate' } }}
+        ]).exec((e, d) => {
+          if (d) {
+            HistoryModel.aggregate([
+              { $lookup: { from: 'issues', localField: 'issue', foreignField: '_id', as: 'issueinfo' } },
+              { $unwind: '$issueinfo' },
+              { $match: { 'issueinfo.sprint': mongoose.Types.ObjectId(_id), type: 'log' }},
+              { $project: {
+                day: { $substr: [{ "$add": ["$create_at", 28800000]}, 0, 10]},
+                value: 1
+              }},
+              { $group: { _id: '$day', count: { $sum: '$value' } } }
+            ]).exec((error, doc) => {
+              if (doc) {
+                res.send({ code: 0, data: { sprint, totalEstimate: d[0].count, data: doc } })
+              } else res.send({ code: 1, data: 'error' })
+            })
+          } else res.send({ code: 1, data: 'error' })
+        })
+      } else res.send({ code: 1, data: 'error' })
+    })
+  }
+
+  // 燃起图
+  async burnUp(req, res, next) {
+    const { _id } = req.body
+    SprintModel.findById(_id).exec((err, sprint) => {
+      if (sprint) {
+        HistoryModel.aggregate([
+          { $lookup: { from: 'issues', localField: 'issue', foreignField: '_id', as: 'issueinfo' } },
+          { $unwind: '$issueinfo' },
+          { $match: { 'issueinfo.sprint': mongoose.Types.ObjectId(_id), type: { $in: ['testing', 'verified'] } }},
+          { $project: {
+            day: { $substr: [{ "$add": ["$create_at", 28800000]}, 0, 10]},
+            type: 1
+          }},
+          { $group: { _id: { day: '$day', type: '$type' } , count: { $sum: 1 } } }
+        ]).exec((error, doc) => {
+          if (doc) {
+            res.send({ code: 0, data: { sprint, data: doc } })
+          } else res.send({ code: 1, data: 'error' })
+        })
+      } else res.send({ code: 1, data: 'error' })
+    })
+  }
+
+  // 每日新增任务统计
+  async newDaily(req, res, next) {
+    const { _id } = req.body
+    SprintModel.findById(_id).exec((err, sprint) => {
+      if (sprint) {
+        HistoryModel.aggregate([
+          { $lookup: { from: 'issues', localField: 'issue', foreignField: '_id', as: 'issueinfo' } },
+          { $unwind: '$issueinfo' },
+          { $match: { 'issueinfo.sprint': mongoose.Types.ObjectId(_id), type: 'create' }},
+          { $project: {
+            day: { $substr: [{ "$add": ["$create_at", 28800000]}, 0, 10]}
+          }},
+          { $group: { _id: '$day' , count: { $sum: 1 } } }
+        ]).exec((error, doc) => {
+          if (doc) {
+            res.send({ code: 0, data: { sprint, data: doc } })
+          } else res.send({ code: 1, data: 'error' })
+        })
+      } else res.send({ code: 1, data: 'error' })
+    })
   }
 }
 

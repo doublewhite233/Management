@@ -58,4 +58,39 @@ router.post('/delete', issue_controller.delete)
   */
 router.post('/mywork', issue_controller.mywork)
 
+// 任务概况图(任务状态)
+/*
+  body:
+  _id: [required, String], 项目_id
+  */
+router.post('/detail', issue_controller.detail)
+
+// 任务概况图(任务类型)
+/*
+  body:
+  _id: [required, String], 项目_id
+  */
+router.post('/detailbytype', issue_controller.detailByType)
+
+// 燃尽图
+/*
+  body:
+  _id: [required, String], sprint_id
+  */
+router.post('/burndown', issue_controller.burnDown)
+
+// 燃起图
+/*
+  body:
+  _id: [required, String], sprint_id
+  */
+router.post('/burnup', issue_controller.burnUp)
+
+// 每日新增任务统计
+/*
+  body:
+  _id: [required, String], sprint_id
+  */
+router.post('/newdaily', issue_controller.newDaily)
+
 export default router

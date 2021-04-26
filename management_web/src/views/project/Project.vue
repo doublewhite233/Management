@@ -49,7 +49,7 @@ export default {
         { name: '代办需求', icon: 'el-icon-location', path: '/project/backlog' },
         { name: '看板', icon: 'el-icon-s-order', path: '/project/dashboard' },
         { name: '统计报表', icon: 'el-icon-s-marketing', path: '/project/statistics' },
-        { name: '历史报告', icon: 'el-icon-s-data', path: '/project/report' },
+        { name: '历史冲刺', icon: 'el-icon-s-data', path: '/project/report' },
         { divider: true },
         { name: '任务', icon: 'el-icon-message-solid', path: '/project/issue' },
         { name: '项目详情', icon: 'el-icon-info', path: '/project/detail' }

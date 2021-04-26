@@ -56,6 +56,18 @@ export const constantRoutes = [
         component: () => import('@/views/projectChild/statistics/Statistics.vue')
       },
       {
+        path: 'report',
+        name: '历史冲刺',
+        meta: { path: '/report' },
+        component: () => import('@/views/projectChild/report/Report.vue')
+      },
+      {
+        path: 'issue',
+        name: '任务',
+        meta: { path: '/issue' },
+        component: () => import('@/views/projectChild/issue/Issue.vue')
+      },
+      {
         path: 'detail',
         name: '项目详情',
         meta: { path: '/project' },

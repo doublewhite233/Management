@@ -55,3 +55,43 @@ export function getMyData(_id) {
     data: { _id }
   })
 }
+
+export function getDetailData(_id) {
+  return request({
+    url: '/issue/detail',
+    method: 'post',
+    data: { _id }
+  })
+}
+
+export function getDetailDataByType(_id) {
+  return request({
+    url: '/issue/detailbytype',
+    method: 'post',
+    data: { _id }
+  })
+}
+
+export function getBurnDown(_id) {
+  return request({
+    url: '/issue/burndown',
+    method: 'post',
+    data: { _id }
+  })
+}
+
+export function getBurnUp(_id) {
+  return request({
+    url: '/issue/burnup',
+    method: 'post',
+    data: { _id }
+  })
+}
+
+export function getNewDaily(_id) {
+  return request({
+    url: '/issue/newdaily',
+    method: 'post',
+    data: { _id }
+  })
+}

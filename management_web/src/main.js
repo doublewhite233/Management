@@ -21,12 +21,11 @@ Vue.use(ElementUI)
 // v-contextmenu
 import contentmenu from 'v-contextmenu'
 import 'v-contextmenu/dist/index.css'
+Vue.use(contentmenu)
 
 // vue-animate-number
 import VueAnimateNumber from 'vue-animate-number'
 Vue.use(VueAnimateNumber)
-
-Vue.use(contentmenu)
 
 Vue.config.productionTip = false
 

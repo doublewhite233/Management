@@ -448,7 +448,9 @@ export default {
           }
           if (this.dialogTitle === '记录时间') {
             await this.$confirm(`您确定要记录工作时间吗？`).then(async() => {
-              if (time > this.issueInfo.logtime) {
+              if (this.issueInfo.state !== 'inprogress') {
+                this.$message({ message: '只有在进行中的任务才能记录时间！', type: 'warning' })
+              } else if (time > this.issueInfo.logtime) {
                 this.$message({ message: '记录的时间大于剩余时间！', type: 'warning' })
               } else {
                 const res = await updateIssue(this.issueInfo._id, { logtime: this.issueInfo.logtime - time })

@@ -5,11 +5,15 @@
         <el-card>
           <el-row type="flex">
             <div class="user-info">
-              <div style="width: 240px;">欢迎您，{{ $store.state.user_info.username }}！</div>
+              <div>
+                <div>欢迎您，{{ $store.state.user_info.username }}！</div>
+                <v-chart class="chart" :option="option" />
+              </div>
               <el-divider direction="vertical" />
             </div>
             <div style="width: 100%;">
               <div style="color: #909399;">{{ getDate(new Date(), 'yyyy年MM月dd日') }}</div>
+              <div style="margin-top: 20px;">当前工作情况总计</div>
               <div class="top-data">
                 <div v-for="item in Object.keys(topData)" :key="item">
                   <div class="top-data-title">{{ dataText[item] }}</div>
@@ -104,7 +108,29 @@ import { getMyHistory } from '@/network/history.js'
 import { getMyProject } from '@/network/project.js'
 import { formatDate, formatHourtoLog } from '@/utils/index.js'
 
+// vue-echarts
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+} from 'echarts/components'
+import VChart from 'vue-echarts'
+
+use([
+  CanvasRenderer,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+])
+
 export default {
+  components: {
+    VChart
+  },
   data() {
     return {
       topData: {},
@@ -115,6 +141,7 @@ export default {
         inprogress: '我进行中的任务',
         project: '我参与的项目数'
       },
+      chartText: { todo: '未开始', inprogress: '进行中', testing: '测试中', verified: '验收中' },
       projectData: [],
       dialogVisible: false,
       historyData: [],
@@ -127,6 +154,32 @@ export default {
         closed: ['将任务', ' 状态修改为已关闭'],
         update: ['更新了任务', '信息'],
         estimate: ['修改任务', '预计耗时为']
+      },
+      option: {
+        title: {
+          text: '当前用户任务进行情况',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        series: [
+          {
+            name: '当前用户任务进行情况',
+            type: 'pie',
+            radius: '55%',
+            center: ['50%', '60%'],
+            data: [],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
       }
     }
   },
@@ -155,6 +208,10 @@ export default {
         const keys = Object.keys(res.data)
         Object.keys(this.dataText).forEach(k => {
           if (keys.indexOf[k] !== -1) this.topData[k] = res.data[k]
+        })
+        // echarts填充
+        Object.keys(this.chartText).forEach(k => {
+          this.option.series[0].data.push({ value: res.data[k], name: this.chartText[k] })
         })
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
@@ -189,16 +246,17 @@ export default {
 
 .user-info {
   font-weight: bold;
-  width: 260px;
-  height: 150px;
+  width: 360px;
+  height: 250px;
   display: flex;
 }
 
 .top-data {
   margin: 0 30px;
-  padding-top: 20px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  height: 80%;
   .top-data-title {
     font-size: 14px;
     margin-bottom: 20px;
@@ -214,5 +272,11 @@ export default {
   font-weight: bold;
   font-style:italic;
   cursor: pointer;
+}
+
+.chart {
+  margin-top: 20px;
+  width: 340px;
+  height: 220px;
 }
 </style>

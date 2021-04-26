@@ -36,6 +36,7 @@
       <el-col :span="12">
         <el-card class="cards" style="margin-left: 10px">
           <div slot="header"><span>任务概况</span></div>
+          <v-chart class="chart" :option="option" />
         </el-card>
       </el-col>
     </el-row>
@@ -74,10 +75,33 @@
 
 <script>
 import { getProjectDetail, addTeamMember, deleteTeamMember } from '@/network/project.js'
+import { getDetailData } from '@/network/issue.js'
 import { getUserData } from '@/network/user.js'
 import { formatDate } from '@/utils/index.js'
 
+// vue-echarts
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { PieChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+} from 'echarts/components'
+import VChart from 'vue-echarts'
+
+use([
+  CanvasRenderer,
+  PieChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+])
+
 export default {
+  components: {
+    VChart
+  },
   data() {
     return {
       projectData: {},
@@ -86,7 +110,35 @@ export default {
       selectLoading: false,
       addUser: '',
       personOption: [],
-      popVisible: false
+      popVisible: false,
+      issueStates: { todo: '未开始', inprogress: '进行中', testing: '测试中', verified: '验收中', closed: '已关闭' },
+      option: {
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: []
+        },
+        series: [
+          {
+            name: '任务概况',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '60%'],
+            data: [],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
+      }
     }
   },
   computed: {
@@ -110,6 +162,16 @@ export default {
         this.projectData = data.data
       } else {
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
+      }
+      // chart
+      const chart = await getDetailData(this.$route.query.id)
+      if (chart && chart.code === 0) {
+        this.option.series[0].data = []
+        this.option.legend.data = []
+        Object.keys(this.issueStates).forEach(k => {
+          this.option.series[0].data.push({ value: chart.data[k], name: this.issueStates[k] })
+          this.option.legend.data.push(this.issueStates[k])
+        })
       }
     },
     showMoreTeam() {
@@ -178,5 +240,9 @@ export default {
 
 .cards {
   margin-top: 20px;
+}
+
+.chart {
+  height: 300px;
 }
 </style>

@@ -194,15 +194,6 @@ export default {
           this.personOption.push({ value: i._id, label: `${i.username}(${i.mail})` })
         })
       }
-      // 如果有正在进行中的sprint，打开collapse
-      this.sprintList.find(i => {
-        if (i.state === 'running') {
-          if (this.activeNames.indexOf(i._id) === -1) {
-            this.activeNames.push(i._id)
-          }
-        }
-        return i.state === 'running'
-      })
     }
   },
   destroyed() {
@@ -215,6 +206,16 @@ export default {
       this.sprintList = data
       const sprintids = [null]
       this.sprintList.forEach(i => sprintids.push(i._id))
+      // 如果有正在进行中的sprint，打开collapse
+      this.activeNames = ['backlog']
+      this.sprintList.find(i => {
+        if (i.state === 'running') {
+          if (this.activeNames.indexOf(i._id) === -1) {
+            this.activeNames.push(i._id)
+          }
+        }
+        return i.state === 'running'
+      })
       // 根据project sprint信息获取任务信息并分类
       const issueRes = await getIssueData(project, sprintids, this.searchList)
       this.issueInfo = {}
