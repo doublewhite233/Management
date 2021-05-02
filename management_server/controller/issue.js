@@ -24,13 +24,28 @@ class issue_controller {
   // 获取任务信息
   async getData(req, res, next) {
     const { project } = req.body
-    const findQuery = { project: project }
+    let findQuery = { project: project }
     if (req.body.sprint && req.body.sprint.length !== 0) {
       findQuery.sprint = { $in: req.body.sprint }
     }
     if (req.body.user && req.body.user.length !== 0) {
       findQuery.assignee = { $in: req.body.user }
     }
+    if (req.body.sprint.includes(null) && req.body.sprint.length > 1) {
+      const sprint = []
+      req.body.sprint.forEach((k, i) => {
+        if (k !== null) sprint.push(k)
+      })
+      const temp = { $or: [JSON.parse(JSON.stringify(findQuery)), JSON.parse(JSON.stringify(findQuery))] }
+      temp.$or[0].sprint = { $in: sprint }
+      temp.$or[1].sprint = null
+      temp.$or[1].state = { $ne: 'closed' }
+      findQuery = temp
+    }
+    if (req.body.sprint.includes(null) && req.body.sprint.length === 1) {
+      findQuery.state = { $ne: 'closed' }
+    }
+    
     const query = IssueModel.find(findQuery, { desc: 0 }).populate('type', 'name').populate('assigner assignee', 'username mail').sort({ 'priority': 1 })
     query.exec(async (err, doc) => {
       if (doc) {
@@ -174,7 +189,7 @@ class issue_controller {
               { $group: { _id: '$day', count: { $sum: '$value' } } }
             ]).exec((error, doc) => {
               if (doc) {
-                res.send({ code: 0, data: { sprint, totalEstimate: d[0].count, data: doc } })
+                res.send({ code: 0, data: { sprint, totalEstimate: d.length > 0 ? d[0].count : 0, data: doc } })
               } else res.send({ code: 1, data: 'error' })
             })
           } else res.send({ code: 1, data: 'error' })
@@ -225,6 +240,46 @@ class issue_controller {
           } else res.send({ code: 1, data: 'error' })
         })
       } else res.send({ code: 1, data: 'error' })
+    })
+  }
+
+  // 所有问题信息
+  async getAll(req, res, next) {
+    // 获取skip和sort、search
+    const { project } = req.body
+    let skip = 0
+    const sort = {}
+    let search = {}
+    let findQuery = { project }
+    if (req.body.skip && Number(req.body.skip) !== NaN) skip = Number(req.body.skip)
+    if (req.body.sort && typeof(req.body.sort) === 'string') {
+      sort[req.body.sort] = -1
+    } else {
+      sort['update_at'] = -1
+    }
+    if (req.body.order && Number(req.body.order) !== NaN) sort[req.body.sort] = Number(req.body.order)
+    if (req.body.search) {
+      search = req.body.search
+    }
+    if (Object.keys(search).length > 0) {
+      Object.keys(search).forEach(k => {
+        if (typeof(search[k]) === 'string') {
+          findQuery[k] = { $regex: search[k] }
+        } else {
+          findQuery[k] = { $in: search[k] }
+        }
+      })
+    }
+    console.log(findQuery)
+    const totalCount = await IssueModel.find({ project }).countDocuments()
+    const total = await IssueModel.find(findQuery).countDocuments()
+    const query = IssueModel.find(findQuery).skip(skip).sort(sort).populate('assigner assignee', 'username mail').populate('type', 'name').populate('sprint', 'name')
+    query.limit(10).exec(async (err, data) => {
+      if (data) {
+        res.send({ code: 0, data, total, totalCount })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
     })
   }
 }

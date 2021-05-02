@@ -95,3 +95,11 @@ export function getNewDaily(_id) {
     data: { _id }
   })
 }
+
+export function getAllIssue(data) {
+  return request({
+    url: '/issue/all',
+    method: 'post',
+    data: { ...data }
+  })
+}

@@ -19,7 +19,7 @@
               <el-button type="danger" icon="el-icon-delete" @click.stop="handleDeleteSprint(i._id, i.name)"></el-button>
             </el-button-group>
             <el-button v-if="i.state === 'new'" class="util" @click.stop="handleStartSprint(i)">开始冲刺</el-button>
-            <el-button v-else class="util" type="primary">结束冲刺</el-button>
+            <el-button v-else class="util" type="primary" @click.stop="handleEndSprint(i)">结束冲刺</el-button>
           </span>
         </div>
 
@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import { getSprintData, createSprint, deleteSprint, updateSprint } from '@/network/sprint.js'
+import { getSprintData, createSprint, deleteSprint, updateSprint, closeSprint } from '@/network/sprint.js'
 import { getTeamInfo } from '@/network/project.js'
 import { getIssueData, moveIssueSprint } from '@/network/issue.js'
 import { logHistory } from '@/network/history.js'
@@ -279,6 +279,19 @@ export default {
         } else { this.editData[k] = '' }
       })
       this.editData._id = item._id
+    },
+    async handleEndSprint(item) {
+      this.$confirm('您确定要结束这个冲刺吗？该冲刺中未关闭的任务将被移入代办需求中哦。').then(async() => {
+        const data = await closeSprint(item._id)
+        if (data && data.code === 0) {
+          this.$message({ message: '操作成功！', type: 'success' })
+          await this.fetchData(this.$route.query.id)
+        } else {
+          this.$message({ message: '似乎出了一点问题...', type: 'error' })
+        }
+      }).catch(() => {
+        this.$message.info('已取消')
+      })
     },
     async handleSubmit() {
       this.$refs.dialogForm.validate(async(valid) => {

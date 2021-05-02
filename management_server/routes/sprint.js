@@ -35,12 +35,29 @@ router.post('/update', sprint_controller.update)
 
 // 冲刺信息展示
 /*
-  params:
+  body:
   skip: [Number], 分页查找偏移量，默认为0
   state: [Array, required], 问题状态 e.g['running']
   project: [ObjectId, required], 所属项目_id
-  search: [String], todo
   */
 router.post('/data', sprint_controller.getData)
+
+// 关闭冲刺
+/*
+  bpdy:
+  _id: [String], 冲刺_id
+  */
+router.post('/close', sprint_controller.close)
+
+// 历史冲刺信息
+/*
+  body:
+  project: [required, String], 项目_id
+  skip: [Number], 分页查找偏移量，默认为0
+  sort: [String], 排序，默认按start_at排序
+  order: [Number], 1正序；-1倒序, 默认倒序
+  search: [Object], 查找内容(名称)
+  */
+router.post('/report', sprint_controller.getReport)
 
 export default router

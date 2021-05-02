@@ -17,7 +17,7 @@ router.post('/create', issue_controller.create)
   body:
   project: [String, required], 项目_id;
   sprint: [Array], Sprint_id;
-  user: [Array], user_id
+  user: [Array], user_id; 该查询不显示sprint为null且已关闭的问题
   */
 router.post('/data', issue_controller.getData)
 
@@ -92,5 +92,16 @@ router.post('/burnup', issue_controller.burnUp)
   _id: [required, String], sprint_id
   */
 router.post('/newdaily', issue_controller.newDaily)
+
+// 所有问题信息
+/*
+  body:
+  project: [required, String], 项目_id
+  skip: [Number], 分页查找偏移量，默认为0
+  sort: [String], 排序，默认按update_at排序
+  order: [Number], 1正序；-1倒序, 默认倒序
+  search: [Object], 查找内容
+  */
+  router.post('/all', issue_controller.getAll)
 
 export default router

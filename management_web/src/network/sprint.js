@@ -31,3 +31,19 @@ export function updateSprint(formData) {
     data: { ...formData }
   })
 }
+
+export function closeSprint(_id) {
+  return request({
+    url: '/sprint/close',
+    method: 'post',
+    data: { _id }
+  })
+}
+
+export function getReport(data) {
+  return request({
+    url: '/sprint/report',
+    method: 'post',
+    data: { ...data }
+  })
+}

@@ -29,7 +29,7 @@ router.get('/data', user_controller.userData)
 
 // 管理及组织界面用户信息展示
 /*
-  params:
+  body:
   skip: [Number], 分页查找偏移量，默认为0
   sort: [String], 排序，默认按更新时间排序
   order: [Number], 1正序；-1倒序, 默认倒序

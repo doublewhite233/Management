@@ -58,6 +58,53 @@ class sprint_controller {
       }
     })
   }
+
+  // 关闭冲刺
+  async close(req, res, next) {
+    const { _id } = req.body
+    SprintModel.findByIdAndUpdate({ _id }, { state: 'closed', end_at: new Date() }, (err, doc) => {
+      if (doc) {
+        IssueModel.updateMany({ sprint: _id, state: { $ne: 'closed' } }, { sprint: null }, (e, d) => {
+          if (d) {
+            res.send({ code: 0, data: 'success' })
+          } else res.send({ code: 1, data: 'error' })
+        })
+      } else res.send({ code: 1, data: 'error' })
+    })
+  }
+
+  // 历史冲刺信息
+  async getReport(req, res, next) {
+    // 获取skip和sort、search
+    const { project } = req.body
+    let skip = 0
+    const sort = {}
+    let search = ''
+    let findQuery = { project }
+    if (req.body.skip && Number(req.body.skip) !== NaN) skip = Number(req.body.skip)
+    if (req.body.sort && typeof(req.body.sort) === 'string') {
+      sort[req.body.sort] = -1
+    } else {
+      sort['start_at'] = -1
+    }
+    if (req.body.order && Number(req.body.order) !== NaN) sort[req.body.sort] = Number(req.body.order)
+    if (req.body.search) {
+      search = req.body.search
+    }
+    if (search !== '') {
+      findQuery.name = { $regex: search }
+    }
+    const totalCount = await SprintModel.find({ project }).countDocuments()
+    const total = await SprintModel.find(findQuery).countDocuments()
+    const query = SprintModel.find(findQuery).skip(skip).sort(sort)
+    query.limit(10).exec(async (err, data) => {
+      if (data) {
+        res.send({ code: 0, data, total, totalCount })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
 }
 
 export default new sprint_controller()

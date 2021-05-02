@@ -21,7 +21,7 @@
     <el-dialog title="详细信息" :visible.sync="selectDiaVisible" width="40%">
       <el-form :model="formData" :rules="rules" ref="dialogForm" label-position="left" label-width="80px" style="padding: 0 20px">
         <el-form-item label="选择冲刺" prop="sprint">
-          <el-select v-model="formData.sprint" placeholder="请选择要查看的冲刺">
+          <el-select v-model="formData.sprint" placeholder="请选择要查看的冲刺" filterable>
             <el-option v-for="i in sprintOptions" :key="i._id" :label="i.name" :value="i._id" />
           </el-select>
         </el-form-item>
@@ -239,6 +239,7 @@ export default {
               })
               estimateData[estimateData.length - 1] = 0
               // 清空原有echarts数据
+              if (this.$refs.vueChart) this.$refs.vueChart.clear()
               this.option.series = []
               this.option.legend.data = ['参考线(h)', '实际剩余工时(h)']
               this.option.series[0] = { type: 'line', data: [] }
@@ -300,6 +301,7 @@ export default {
                 }
               })
               // 清空原有echarts数据
+              if (this.$refs.vueChart) this.$refs.vueChart.clear()
               this.option.series = []
               this.option.legend.data = ['开发完成', '测试完成']
               this.option.series[0] = { type: 'line', data: [] }
@@ -340,6 +342,7 @@ export default {
                 } else countData.push(0)
               })
               // 清空原有echarts数据
+              if (this.$refs.vueChart) this.$refs.vueChart.clear()
               this.option.series = []
               this.option.legend.data = ['新建问题数']
               this.option.series[0] = { type: 'bar', data: [] }

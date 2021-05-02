@@ -64,10 +64,10 @@
                 <el-card>
                   <div style="display: flex;">
                     <span v-if="item.type === 'estimate'">{{ `${item.user.username} ${historyText[item.type][0]} `}}
-                      <span class="issue-name" @click="handleClickIssue(item.issue._id)">{{ item.issue.name.length > 6 ? item.issue.name.slice(0,10) + '...' : item.issue.name }}</span>{{` ${historyText[item.type][1]} ${getLog(item.value)}` }}
+                      <span class="issue-name" @click="handleClickIssue(item.issue._id)">{{ item.issue.name.length > 10 ? item.issue.name.slice(0,10) + '...' : item.issue.name }}</span>{{` ${historyText[item.type][1]} ${getLog(item.value)}` }}
                     </span>
                     <span v-else>{{ `${item.user.username} ${historyText[item.type][0]} `}}
-                      <span class="issue-name" @click="handleClickIssue(item.issue._id)">{{ item.issue.name.length > 6 ? item.issue.name.slice(0,10) + '...' : item.issue.name }}</span>{{ ` ${historyText[item.type][1]}` }}
+                      <span class="issue-name" @click="handleClickIssue(item.issue._id)">{{ item.issue.name.length > 10 ? item.issue.name.slice(0,10) + '...' : item.issue.name }}</span>{{ ` ${historyText[item.type][1]}` }}
                     </span>
                   </div>
                 </el-card>
