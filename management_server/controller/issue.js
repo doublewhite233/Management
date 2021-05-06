@@ -270,7 +270,6 @@ class issue_controller {
         }
       })
     }
-    console.log(findQuery)
     const totalCount = await IssueModel.find({ project }).countDocuments()
     const total = await IssueModel.find(findQuery).countDocuments()
     const query = IssueModel.find(findQuery).skip(skip).sort(sort).populate('assigner assignee', 'username mail').populate('type', 'name').populate('sprint', 'name')

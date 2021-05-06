@@ -30,6 +30,19 @@ class user_controller {
       }
     })
   }
+
+  // 获取用户信息
+  async info(req, res, next) {
+    const { _id } = req.body
+    UserModel.findOne({ _id }, { password: 0 }).populate('department', 'name').exec((err, user) => {
+      if(user) {
+        res.send({ code: 0, data: user })
+      } else {
+        res.send({ code: 1, data: 'error' })
+      }
+    })
+  }
+
   // 获取所有用户信息
   async userData(req, res, next) {
     let input = ''

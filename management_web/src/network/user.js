@@ -38,3 +38,11 @@ export function deleteUser(_id) {
     data: { _id }
   })
 }
+
+export function getUserInfo(_id) {
+  return request({
+    url: '/user/info',
+    method: 'post',
+    data: { _id }
+  })
+}

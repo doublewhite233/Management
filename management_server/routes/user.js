@@ -20,6 +20,13 @@ router.post('/login', user_controller.userLogin)
   */
 router.post('/userinfo', user_controller.userInfo)
 
+// 获取用户所有信息
+/*
+  body:
+  _id: [required, String], 用户id
+  */
+  router.post('/info', user_controller.info)
+
 // 获取所有用户信息
 /*
   params:

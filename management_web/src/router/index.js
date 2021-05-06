@@ -94,8 +94,18 @@ export const constantRoutes = [
     children: [{
       path: 'issue',
       name: '任务详情',
-      component: () => import('@/views/issue/Issue.vue'),
-      meta: { path: '/project' }
+      component: () => import('@/views/issue/Issue.vue')
+    }]
+  },
+  {
+    path: '/',
+    component: Layout,
+    hidden: true,
+    redirect: '/userinfo',
+    children: [{
+      path: 'userinfo',
+      name: '个人中心',
+      component: () => import('@/views/userInfo/UserInfo.vue')
     }]
   }
 ]

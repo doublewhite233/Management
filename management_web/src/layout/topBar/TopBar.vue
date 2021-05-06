@@ -14,7 +14,7 @@
         <el-dropdown @command="handleCommand">
           <span style="cursor: pointer; color: #fff">{{ $store.state.user_info.username }}</span>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="a">我的主页</el-dropdown-item>
+            <el-dropdown-item command="userinfo">个人中心</el-dropdown-item>
             <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -64,6 +64,10 @@ export default {
         }).catch(() => {
           this.$message.info('已取消')
         })
+      }
+      // 个人主页
+      if (command === 'userinfo') {
+        this.$router.push({ path: '/userinfo', query: { id: this.$store.state.user_info._id }})
       }
     }
   }

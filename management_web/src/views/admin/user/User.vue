@@ -213,9 +213,9 @@ export default {
             }
             const data = await updateUser(this.userForm._id, formData)
             if (data && data.code === 0) {
-              this.$message({ message: data.data, type: 'success' })
+              this.$message({ message: '修改成功', type: 'success' })
             } else {
-              this.$message({ message: '修改项目失败！', type: 'error' })
+              this.$message({ message: '修改失败！', type: 'error' })
             }
           }
           // 重新调用接口，刷新数据

@@ -10,8 +10,7 @@ const userSchema = new Schema({
   username: { type: String },
   role: { type: String, default: 'user', enum: ['admin', 'user'] }, // 用户身份
   department: { type: Schema.Types.ObjectId, ref: 'Department' },
-  // todo
-  extra: { type: Map, of: String },
+  extra: { type: String }, // JSON.stringify
   create_at: { type: Date, required: true },
   update_at: { type: Date, required: true }
 })

@@ -26,7 +26,11 @@
           </el-input>
 
           <el-table :data="userData" :default-sort="sort" @sort-change="handleSort">
-            <el-table-column prop="username" label="用户名" align="center" sortable="custom" />
+            <el-table-column prop="username" label="用户名" align="center" sortable="custom">
+              <template slot-scope="scope">
+                <el-link  @click="clickUser(scope.row._id)" :underline="false">{{ scope.row.username }}</el-link>
+              </template>
+            </el-table-column>
             <el-table-column prop="mail" label="邮箱" align="center" sortable="custom" />
             <el-table-column prop="role" label="用户类型" align="center" sortable="custom" />
             <el-table-column label="创建时间" align="center" prop="create_at" sortable="custom">
@@ -153,6 +157,9 @@ export default {
       this.$set(this.sort, 'prop', data.prop)
       this.$set(this.sort, 'order', data.order)
       this.fetchData()
+    },
+    clickUser(id) {
+      this.$router.push({ path: '/userinfo', query: { id }})
     }
   }
 }
