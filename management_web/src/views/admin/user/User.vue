@@ -29,6 +29,7 @@
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <el-button @click="handleUpdate(scope.row)" size="mini">修改</el-button>
+            <el-button @click="handleChangePass(scope.row)" type="primary" size="mini">修改密码</el-button>
             <el-button @click="handleDelete(scope.row._id)" type="danger" size="mini">删除</el-button>
           </template>
         </el-table-column>
@@ -74,11 +75,27 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog title="修改密码" :visible.sync="passVisible" width="50%">
+      <el-form :model="passForm" :rules="passRules" label-position="left" label-width="80px" ref="passForm" style="padding: 0 20px">
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="passForm.password" placeholder="请输入密码" show-password />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="conPass">
+          <el-input v-model="passForm.conPass" placeholder="请再次输入密码" show-password />
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleChPass">确定</el-button>
+      </span>
+    </el-dialog>
   </el-main>
 </template>
 
 <script>
-import { getAdminData, createUser, updateUser, deleteUser } from '@/network/user.js'
+import { getAdminData, createUser, updateUser, deleteUser, chPass } from '@/network/user.js'
 import { getDepartment } from '@/network/department.js'
 import { formatDate } from '@/utils/index.js'
 import { encryptAES } from '@/utils/secret.js'
@@ -95,16 +112,26 @@ export default {
         callback()
       }
     }
+
+    const validateConPass = (rule, value, callback) => {
+      if (value !== this.passForm.password) {
+        callback(new Error('两次输入密码不相同！'))
+      } else {
+        callback()
+      }
+    }
     return {
       loading: false,
       userData: [],
       page: { total: 1, currentPage: 1, size: 10, totalCount: 0 },
       sort: { prop: 'update_at', order: 'descending' },
       search: { text: '' },
+      passVisible: false,
       dialogVisible: false,
       dialogTitle: '',
       departmentOption: [],
       userForm: { username: '', mail: '', password: '', role: 'user', department: '', _id: '' },
+      passForm: { password: '', conPass: '', _id: '' },
       rules: {
         username: { required: true, message: '请输入用户名', trigger: 'blur' },
         mail: [{ required: true, validator: validateMail, trigger: 'blur' }],
@@ -112,6 +139,13 @@ export default {
           { required: true, message: '密码不能为空', trigger: 'blur' },
           { min: 6, max: 18, message: '请输入6-18位密码', trigger: 'blur' }
         ]
+      },
+      passRules: {
+        password: [
+          { required: true, message: '密码不能为空', trigger: 'blur' },
+          { min: 6, max: 18, message: '请输入6-18位密码', trigger: 'blur' }
+        ],
+        conPass: { required: true, validator: validateConPass, trigger: 'blur' }
       }
     }
   },
@@ -187,6 +221,28 @@ export default {
       this.$set(this.sort, 'prop', data.prop)
       this.$set(this.sort, 'order', data.order)
       this.fetchData()
+    },
+    handleChangePass(row) {
+      this.passVisible = true
+      this.passForm.password = ''
+      this.passForm.conPass = ''
+      this.passForm._id = row._id
+      this.$nextTick(() => { this.$refs.passForm.clearValidate() })
+    },
+    async handleChPass() {
+      this.$refs.passForm.validate(async(valid) => {
+        if (valid) {
+          await this.$confirm('您确定要修改该用户的密码吗？').then(async() => {
+            const res = await chPass(this.passForm._id, encryptAES(this.passForm.conPass))
+            if (res && res.code === 0) {
+              this.$message({ message: '修改用户密码成功！', type: 'success' })
+            } else this.$message({ message: '修改用户密码失败！', type: 'error' })
+            this.passVisible = false
+          }).catch(() => {
+            this.$message.info('已取消')
+          })
+        }
+      })
     },
     async handleSubmit() {
       // 表单校验

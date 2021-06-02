@@ -21,7 +21,7 @@
       </el-form>
       <el-divider>其他方式登录</el-divider>
       <div class="login-by">
-        <el-image :src="require('@/assets/icons/github.svg')" class="login-by-icon" />
+        <el-image :src="require('@/assets/icons/github.svg')" class="login-by-icon" @click="toGitHub" />
         <el-image :src="require('@/assets/icons/wechat.svg')" class="login-by-icon" />
       </div>
     </div>
@@ -31,6 +31,7 @@
 <script>
 import canvasNest from '@/components/canvasNest/index.vue'
 import { resetRouter } from '@/router'
+import { Partten } from '@/partten'
 
 export default {
   components: {
@@ -80,6 +81,13 @@ export default {
         this.loading = false
         this.$message({ message: '似乎出了一点问题...', type: 'error' })
       })
+    },
+
+    toGitHub() {
+      const oauth_uri = Partten.oauth_uri
+      const client_id = Partten.client_id
+      const redirect_uri = Partten.redirect_uri
+      window.location.href = `${oauth_uri}?client_id=${client_id}&redirect_url=${redirect_uri}`
     }
   }
 }

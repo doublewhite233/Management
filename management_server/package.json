@@ -17,6 +17,7 @@
     "http-errors": "~1.6.3",
     "mongoose": "^5.11.18",
     "morgan": "~1.9.1",
+    "node-fetch": "^2.6.1",
     "node-sass-middleware": "0.11.0"
   }
 }

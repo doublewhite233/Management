@@ -24,7 +24,7 @@
             <el-popover trigger="hover" placement="bottom">
               <p>冲刺目标: {{ scope.row.goal }}</p>
               <div slot="reference">
-                <span>{{ scope.row.goal.length > 20 ? scope.row.goal.slice(0,20) + '...' : scope.row.goal }}</span>
+                <span>{{ scope.row.goal && scope.row.goal.length > 20 ? scope.row.goal.slice(0,20) + '...' : scope.row.goal }}</span>
               </div>
             </el-popover>
           </template>
@@ -104,7 +104,6 @@ export default {
       this.fetchData(this.$route.query.id)
     },
     async handleCurrentChange() {
-      console.log(this.page.currentPage)
       await this.fetchData(this.$route.query.id)
     }
   }

@@ -5,6 +5,10 @@ import { getCookie } from '@/utils/cookies.js'
 
 // 使用导航守卫
 router.beforeEach((to, from, next) => {
+  if (to.name) {
+    document.title = to.name
+  }
+
   // 获取cookie并判断是否存在
   const cookie = getCookie('userid')
   if (cookie !== undefined) {
@@ -31,7 +35,9 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     // 没有cookie，跳转登陆页面
-    if (to.path !== '/login') {
+    if (to.path === '/jumping') {
+      next()
+    } else if (to.path !== '/login') {
       next({ path: '/login', replace: true })
     } else {
       next()

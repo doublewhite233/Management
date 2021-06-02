@@ -11,7 +11,6 @@ const store = new Vuex.Store({
   state: {
     user_info: { _id: '', username: '', role: '' }, // 用户信息
     project_info: { _id: '', name: '' },
-    loading: false,
     routes: [] // 路由信息
   },
   mutations,

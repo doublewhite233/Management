@@ -26,10 +26,11 @@
       <div class="info-icon-box">
         <div style="display: flex;">
           <el-image :src="require('@/assets/icons/GitHub.png')" class="info-icon" />
-          <div>暂未绑定</div>
+          <div>{{ userInfo.github_id ? userInfo.github_name : '暂未绑定' }}</div>
         </div>
         <div v-if="$store.state.user_info._id === $route.query.id">
-          <el-button size="mini">绑定账号</el-button>
+          <el-button size="mini" v-if="!userInfo.github_id" @click="toGitHub">绑定账号</el-button>
+          <el-button size="mini" v-else type="danger" @click="unbindGitHub">解除绑定</el-button>
         </div>
       </div>
       <div class="info-icon-box">
@@ -78,13 +79,14 @@
 </template>
 
 <script>
-import { getUserInfo, updateUser } from '@/network/user.js'
+import { getUserInfo, updateUser, unBind } from '@/network/user.js'
 import { formatDate } from '@/utils/index.js'
+import { Partten } from '@/partten'
 
 export default {
   data() {
     const validateTel = (rule, value, callback) => {
-      const regex = /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/
+      const regex = /^(17[0-9]|13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/
       if (value.trim() === '') {
         callback()
       } else if (!regex.test(value)) {
@@ -137,7 +139,6 @@ export default {
       const userInfo = await getUserInfo(id)
       if (userInfo && userInfo.code === 0) {
         this.userInfo = userInfo.data
-        // console.log(this.userInfo)
         if (this.userInfo.extra) {
           this.extra = JSON.parse(this.userInfo.extra)
         }
@@ -149,7 +150,6 @@ export default {
       this.$refs.extraForm.validate(async(valid) => {
         if (valid) {
           await this.$confirm('您确定要保存编辑吗？').then(async() => {
-            console.log(this.extra)
             const data = await updateUser(this.$route.query.id, { extra: JSON.stringify(this.extra) })
             if (data && data.code === 0) {
               this.$message({ message: '修改成功', type: 'success' })
@@ -162,6 +162,23 @@ export default {
             this.$message.info('已取消')
           })
         }
+      })
+    },
+    toGitHub() {
+      const oauth_uri = Partten.oauth_uri
+      const client_id = Partten.client_id
+      const redirect_uri = Partten.redirect_uri
+      window.location.href = `${oauth_uri}?client_id=${client_id}&redirect_url=${redirect_uri}`
+    },
+    async unbindGitHub() {
+      await this.$confirm('您确定要解绑账号吗？').then(async() => {
+        const res = await unBind(this.$route.query.id, 'github')
+        if (res && res.code === 0) {
+          this.$message({ message: '解绑成功', type: 'success' })
+          await this.fetchData(this.$route.query.id)
+        } else this.$message({ message: '解绑失败！', type: 'error' })
+      }).catch(() => {
+        this.$message.info('已取消')
       })
     }
   }

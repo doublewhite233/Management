@@ -12,6 +12,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/jumping',
+    component: () => import('@/views/wait/Wait'),
+    hidden: true
+  },
+  {
     path: '/404',
     component: () => import('@/views/404/404.vue'),
     hidden: true
@@ -133,6 +138,12 @@ export const adminRoutes = [
       name: '用户管理',
       component: () => import('@/views/admin/user/User.vue'),
       meta: { path: '/admin/user' }
+    },
+    {
+      path: 'resource',
+      name: '资源管理',
+      component: () => import('@/views/admin/resource/Resource.vue'),
+      meta: { path: '/admin/resource' }
     }]
   }
 ]

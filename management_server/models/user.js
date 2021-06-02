@@ -11,6 +11,8 @@ const userSchema = new Schema({
   role: { type: String, default: 'user', enum: ['admin', 'user'] }, // 用户身份
   department: { type: Schema.Types.ObjectId, ref: 'Department' },
   extra: { type: String }, // JSON.stringify
+  github_id: { type: Number },
+  github_name: { type: String },
   create_at: { type: Date, required: true },
   update_at: { type: Date, required: true }
 })

@@ -71,4 +71,28 @@ router.post('/update', user_controller.update)
   */
 router.post('/delete', user_controller.delete)
 
+// 修改密码
+ /*
+  body:
+  _id: [required, String], 用户_id,
+  passowrd: [required, String], 加密后的密码
+  */
+router.post('/chpass', user_controller.chpass)
+
+// auth-github
+ /*
+  params:
+  code: [required, String], code
+  _id: user_id
+  */
+  router.get('/github_auth', user_controller.authGitHub)
+
+// 解绑第三方账号
+ /*
+  body:
+  type: [required, String], github/wechat
+  _id: user_id
+  */
+  router.post('/unbind', user_controller.unBind)
+
 export default router

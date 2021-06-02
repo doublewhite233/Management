@@ -4,6 +4,9 @@ import UserModel from '../models/user.js'
 import md5 from 'blueimp-md5'
 import { decryptAES } from '../utils/secret.js'
 
+import fetch from 'node-fetch'
+import config from 'config'
+
 class user_controller {
   // 用户登录
   async userLogin(req, res, next) {
@@ -117,7 +120,6 @@ class user_controller {
   async update(req, res, next) {
     const { _id, data } = req.body
     UserModel.findByIdAndUpdate({ _id }, { ... data, update_at: new Date() }, (err, oldDoc) => {
-      console.log(err)
       if (oldDoc) {
         res.send({ code: 0, data: '修改成功！' })
       } else {
@@ -136,6 +138,100 @@ class user_controller {
         res.send({ code: 1, data: 'error' })
       }
     })
+  }
+
+  // 修改密码
+  async chpass(req, res, next) {
+    const { _id, password } = req.body
+    const decryptPass = decryptAES(password)
+    UserModel.findByIdAndUpdate({ _id }, { password: md5(decryptPass) }, (err, doc) => {
+      if (doc) {
+        res.send({ code: 0, data: '修改密码成功' })
+      } else res.send({ code: 1, data: 'error' })
+    })
+  }
+
+  // github_auth
+  async authGitHub(req, res, next) {
+    const { code } = req.query
+    const { _id } = req.query
+    let path = 'https://github.com/login/oauth/access_token'
+    const params = {
+      client_id: config.github_client_id,
+      client_secret: config.github_client_secret,
+      code: code
+    }
+    await fetch(path, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(params)
+    }).then(res => {
+      return res.text()
+    })
+    .then(body => {
+      // 解析并返回access_token
+      let args = body.split('&')
+      let arg = args[0].split('=')
+      let access_token = arg[1]
+      return access_token
+    })
+    .then(async token => {
+      // 通过token获取用户信息
+      let url = 'https://api.github.com/user'
+      await fetch(url, {
+        headers: {
+          'Authorization': 'token ' + token
+        }
+      }).then( res2 => {
+        return res2.json()
+      })
+      .then(response => {
+        if (_id.trim() !== '') {
+          // 存在用户_id，为用户绑定，插入数据库
+          UserModel.find({ github_id: response.id }, (err, doc) => {
+            if (doc) {
+              if (doc.length === 0 || String(doc[0]._id) == _id) {
+                UserModel.findByIdAndUpdate({ _id }, { github_id: response.id, github_name: response.login }, (errr, docc) => {
+                  if (docc) {
+                    res.send({ code: 0, data: '绑定成功！' })
+                  } else {
+                    res.send({ code: 1, data: 'error' })
+                  }
+                })
+              } else {
+                res.send({ code: 2, data: 'duplicate!' })
+              }
+            }
+          })
+        } else {
+          // 无用户_id，为登陆界面唤起登录
+          UserModel.findOne({ github_id: response.id }, { password: 0 }, (err, user) => {
+            if(user) {
+              res.cookie('userid', user._id, { maxAge: 1000*60*60*24 })
+              res.send({ code: 0, data: user })
+            } else {
+              res.send({ code: 1, data: 'error' })
+            }
+          })
+        }
+      })
+    }).catch(() => {
+      res.send({ code: 1, data: 'error' })
+    })
+  }
+
+  // 解绑第三方账号
+  async unBind(req, res, next) {
+    const { _id, type } = req.body
+    if (type === 'github') {
+      UserModel.findByIdAndUpdate({ _id }, { github_id: undefined, github_name: undefined }, (err, doc) => {
+        if (doc) {
+          res.send({ code: 0, data: 'success' })
+        } else res.send({ code: 1, data: 'error' })
+      })
+    }
   }
 }
 

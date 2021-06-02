@@ -15,6 +15,7 @@ const issueSchema = new Schema({
   estimate: { type: Number }, // 预计花费时间，统一采用h为单位
   logtime: { type: Number }, // 剩余时间
   sprint: { type: Schema.Types.ObjectId, ref: 'Sprint' },
+  resource: { type: Schema.Types.ObjectId, ref: 'Resource' },
   state: { type: String, default: 'todo', enum: ['todo', 'inprogress', 'testing', 'verified', 'closed'] },
   create_at: { type: Date, required: true },
   update_at: { type: Date, required: true }

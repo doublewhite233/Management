@@ -58,29 +58,41 @@ export default {
       showSelect: false,
       selectedProject: '',
       selectOption: [],
-      projectInfo: {}
+      projectInfo: {},
+      projectId: ''
+    }
+  },
+  watch: {
+    $route() {
+      this.projectId = this.$route.query.id
+    },
+    async projectId() {
+      await this.fetchData()
     }
   },
   async mounted() {
-    if (this.$route.query.id) {
-      // 获取详情
-      const data = await getProjectDetail(this.$route.query.id)
-      if (data && data.code === 0) {
-        this.projectInfo = data.data
-      } else this.$router.replace('/404')
-    } else {
-      const res = await getProjectData()
-      if (res.code === 0 && res.totalCount > 0) {
-        const path = this.$route.path
-        this.$router.replace({ path: path, query: { id: res.data[0]._id }})
+    await this.fetchData()
+  },
+  methods: {
+    async fetchData() {
+      if (this.$route.query.id) {
+        // 获取详情
         const data = await getProjectDetail(this.$route.query.id)
         if (data && data.code === 0) {
           this.projectInfo = data.data
         } else this.$router.replace('/404')
+      } else {
+        const res = await getProjectData()
+        if (res.code === 0 && res.totalCount > 0) {
+          const path = this.$route.path
+          this.$router.replace({ path: path, query: { id: res.data[0]._id }})
+          const data = await getProjectDetail(this.$route.query.id)
+          if (data && data.code === 0) {
+            this.projectInfo = data.data
+          } else this.$router.replace('/404')
+        }
       }
-    }
-  },
-  methods: {
+    },
     handleShowSelect() {
       this.showSelect = true
       this.selectOption = []

@@ -16,7 +16,7 @@
     </el-card>
 
     <el-row>
-      <el-col :span="12">
+      <el-col :span="14">
         <el-card class="cards" style="margin-right: 10px">
           <div slot="header">
             <span>团队信息</span>
@@ -26,14 +26,14 @@
             <i class="el-icon-user-solid" />
             {{ i.username }}
           </el-col>
-          <el-col v-if="$store.state.user_info.role === 'admin'" :span="12" class="item">
+          <el-col v-if="$store.state.user_info._id === projectData.leader._id" :span="12" class="item">
             <i class="el-icon-plus" />
             <el-link :underline="false" @click="showMoreTeam" style="font-size: 16px;">团队管理</el-link>
           </el-col>
         </el-card>
       </el-col>
 
-      <el-col :span="12">
+      <el-col :span="10">
         <el-card class="cards" style="margin-left: 10px">
           <div slot="header"><span>任务概况</span></div>
           <v-chart class="chart" :option="option" />
@@ -45,7 +45,7 @@
       <el-table :data="projectData.team" v-if="dialogTitle === '团队信息'">
         <el-table-column prop="username" align="center" label="用户名" />
         <el-table-column prop="mail" align="center" label="邮箱" />
-        <el-table-column label="操作" align="center" width="150" v-if="$store.state.user_info.role === 'admin'">
+        <el-table-column label="操作" align="center" width="150" v-if="$store.state.user_info._id === projectData.leader._id">
           <template slot-scope="scope">
             <el-button @click="handleDeleteTeam(scope)" type="danger" size="mini" :disabled="scope.row._id === projectData.leader._id">删除</el-button>
           </template>
@@ -54,7 +54,7 @@
 
       <span slot="footer">
         <span v-if="dialogTitle === '团队信息'">
-          <el-popover v-model="popVisible" placement="top" trigger="click" width="400" v-if="$store.state.user_info.role === 'admin'">
+          <el-popover v-model="popVisible" placement="top" trigger="click" width="400" v-if="$store.state.user_info._id === projectData.leader._id">
             <el-row>
               <el-col :span="20">
                 <el-select style="width: 95%;" v-model="addUser" filterable remote :remote-method="getPersonList" :loading="selectLoading" placeholder="输入进行查找" clearable>
@@ -230,7 +230,7 @@ export default {
 }
 
 .item {
-  margin-bottom: 18px;
+  margin-bottom: 25px;
 }
 
 .desc {
@@ -243,6 +243,6 @@ export default {
 }
 
 .chart {
-  height: 300px;
+  height: 280px;
 }
 </style>

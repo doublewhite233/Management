@@ -46,3 +46,26 @@ export function getUserInfo(_id) {
     data: { _id }
   })
 }
+
+export function chPass(_id, password) {
+  return request({
+    url: '/user/chpass',
+    method: 'post',
+    data: { _id, password }
+  })
+}
+
+export function authGitHub(code, user_id) {
+  return request({
+    url: 'user/github_auth',
+    params: { code, _id: user_id }
+  })
+}
+
+export function unBind(_id, type) {
+  return request({
+    url: '/user/unbind',
+    method: 'post',
+    data: { _id, type }
+  })
+}

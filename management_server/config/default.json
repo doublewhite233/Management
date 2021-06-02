@@ -1,5 +1,8 @@
 {
   "port": 3000,
   "host": "127.0.0.1",
-  "url": "mongodb://localhost:27017/Management"
+  "url": "mongodb://localhost:27017/Management",
+
+  "github_client_id": "",
+  "github_client_secret": ""
 }
